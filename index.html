@@ -1,149 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MINDOFI</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="pc.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDOFI Messenger</title>
+    <!-- Підключаємо зовнішні стилі -->
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="app">
+    <!-- ================= 1. ЕКРАН АВТОРИЗАЦІЇ ================= -->
+    <div id="login-screen" class="login-container">
+        <header class="login-header">
+            <div class="logo">MINDOFI</div>
+        </header>
+        <input type="email" id="email-input" class="login-input" placeholder="Введіть ваш Email">
+        <input type="password" id="password-input" class="login-input" placeholder="Введіть пароль">
+        <button id="login-btn" class="login-btn">УВІЙТИ</button>
+        <button id="register-btn" class="login-btn btn-register-outline">СТВОРІТИ АКАУНТ</button>
+    </div>
 
-<header>
-<div class="logo">MINDOFI</div>
-</header>
+    <!-- ================= 2. ГОЛОВНИЙ ЕКРАН МЕСЕНДЖЕРА ================= -->
+    <div id="app-screen" class="app">
+        <header>
+            <div class="logo">MINDOFI</div>
+        </header>
 
-<div class="search">
-<input type="text" placeholder="Search">
-</div>
+        <div class="search">
+            <input type="text" placeholder="Search">
+        </div>
 
-<!-- STORIES -->
+        <!-- ІСТОРІЇ (STORIES) -->
+        <div class="stories">
+            <div class="story">
+                <div class="story-ring"><div class="story-photo"></div></div>
+                <p>You</p>
+            </div>
+            <div class="story">
+                <div class="story-ring"><div class="story-photo"></div></div>
+                <p>John</p>
+            </div>
+            <div class="story">
+                <div class="story-ring"><div class="story-photo"></div></div>
+                <p>Alice</p>
+            </div>
+            <div class="story">
+                <div class="story-ring"><div class="story-photo"></div></div>
+                <p>Mike</p>
+            </div>
+        </div>
 
-<div class="stories">
+        <!-- СПИСОК ЧАТІВ -->
+        <div class="chats-list">
+            <a href="#" class="chat">
+                <div class="avatar"></div>
+                <div class="info">
+                    <div class="name">John</div>
+                    <div class="message">Hello! Welcome to FLYMESS.</div>
+                </div>
+                <div class="time">12:34</div>
+            </a>
+            <a href="#" class="chat">
+                <div class="avatar"></div>
+                <div class="info">
+                    <div class="name">Alice</div>
+                    <div class="message">See you tomorrow 👋</div>
+                </div>
+                <div class="time">11:42</div>
+            </a>
+            <a href="#" class="chat">
+                <div class="avatar"></div>
+                <div class="info">
+                    <div class="name">Mike</div>
+                    <div class="message">Okay 👍</div>
+                </div>
+                <div class="time">Yesterday</div>
+            </a>
+            <a href="#" class="chat">
+                <div class="avatar"></div>
+                <div class="info">
+                    <div class="name">MINDOFI News</div>
+                    <div class="message">Welcome to Beta!</div>
+                </div>
+                <div class="time">Mon</div>
+            </a>
+            <a href="#" class="chat">
+                <div class="avatar"></div>
+                <div class="info">
+                    <div class="name">Support</div>
+                    <div class="message">Need help?</div>
+                </div>
+                <div class="time">Sun</div>
+            </a>
+        </div>
 
-<div class="story">
-<div class="story-ring">
-<div class="story-photo"></div>
-</div>
-<p>You</p>
-</div>
+        <!-- КНОПКА ВИХОДУ З АКАУНТА -->
+        <div class="logout-container">
+            <button id="logout-btn" class="logout-btn">Вийти з акаунта</button>
+        </div>
 
-<div class="story">
-<div class="story-ring">
-<div class="story-photo"></div>
-</div>
-<p>John</p>
-</div>
+        <!-- НАВІГАЦІЙНА ПАНЕЛЬ ВНИЗУ -->
+        <div class="bottom">
+            <a href="#"><span>💬</span>Chats</a>
+            <a href="#"><span>👥</span>People</a>
+            <a href="#"><span>⚙️</span>Settings</a>
+        </div>
+    </div>
 
-<div class="story">
-<div class="story-ring">
-<div class="story-photo"></div>
-</div>
-<p>Alice</p>
-</div>
-
-<div class="story">
-<div class="story-ring">
-<div class="story-photo"></div>
-</div>
-<p>Mike</p>
-</div>
-</div>
-
-<!-- CHATS -->
-
-<a href="chat.html" class="chat">
-
-<div class="avatar"></div>
-
-<div class="info">
-<div class="name">John</div>
-<div class="message">Hello! Welcome to FLYMESS.</div>
-</div>
-
-<div class="time">12:34</div>
-
-</a>
-
-<a href="chat.html" class="chat">
-
-<div class="avatar"></div>
-
-<div class="info">
-<div class="name">Alice</div>
-<div class="message">See you tomorrow 👋</div>
-</div>
-
-<div class="time">11:42</div>
-
-</a>
-
-<a href="chat.html" class="chat">
-
-<div class="avatar"></div>
-
-<div class="info">
-<div class="name">Mike</div>
-<div class="message">Okay 👍</div>
-</div>
-
-<div class="time">Yesterday</div>
-
-</a>
-
-<a href="chat.html" class="chat">
-
-<div class="avatar"></div>
-
-<div class="info">
-<div class="name">MINDOFI News</div>
-<div class="message">Welcome to Beta!</div>
-</div>
-
-<div class="time">Mon</div>
-
-</a>
-
-<a href="chat.html" class="chat">
-
-<div class="avatar"></div>
-
-<div class="info">
-<div class="name">Support</div>
-<div class="message">Need help?</div>
-</div>
-
-<div class="time">Sun</div>
-
-</a>
-
-<!-- NAVIGATION -->
-
-<div class="bottom">
-
-<a href="index.html">
-<img src="chatf.png" width="50px" height="50px">
-</a>
-
-<a href="contacts.html">
-<img src="contacts.png" width="50px" height="50px">
-</a>
-
-<a href="profile.html">
-<img src="profile.png" width="50px" height="50px">
-</a>
-
-<a href="settings.html">
-<img src="settings.png" width="50px" height="50px">
-</a>
-
-</div>
-
-</div>
-
-<script src="desktop.js"></script>
+    <!-- Підключаємо відокремлену логіку як модуль -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
