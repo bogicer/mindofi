@@ -1,8 +1,10 @@
+// Импортируем модули Firebase
 import { initializeApp } from "https://gstatic.com";
 import { getAnalytics } from "https://gstatic.com";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://gstatic.com";
 import { getDatabase, ref, onValue } from "https://gstatic.com";
 
+// Ваши рабочие ключи
 const firebaseConfig = {
     apiKey: "AIzaSyCz313sTrdM_jDKmXY9jWQT4X2RKuB04P4",
     authDomain: "://firebaseapp.com",
@@ -14,35 +16,37 @@ const firebaseConfig = {
     measurementId: "G-6CMMF2MSTP"
 };
 
+// Инициализация
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// Безопасно находим элементы (если их нет на текущей странице, код больше не упадет)
 const emailInput = document.getElementById('email-input');
 const passwordInput = document.getElementById('password-input');
+const loginBtn = document.getElementById('login-btn');
+const registerBtn = document.getElementById('register-btn');
+const logoutBtn = document.getElementById('logout-btn');
 
 // ========================================================
-// 1. АВТОМАТИЧЕСКАЯ ПРОВЕРКА КЭША И АВТО-РЕДИРЕКТ
+// 1. БЕЗОПАСНЫЙ АВТО-РЕДИРЕКТ (ПРОВЕРКА КЭША)
 // ========================================================
 onAuthStateChanged(auth, (user) => {
     const currentPath = window.location.pathname;
-    
-    // Проверяем, находится ли пользователь на странице входа
     const isLoginPage = currentPath.endsWith('index.html') || currentPath === '/' || currentPath.endsWith('index');
 
     if (user) {
-        console.log("Сессия активна:", user.email);
-        // Если авторизован и зашел на index.html -> перенаправляем в мессенджер
+        console.log("Пользователь авторизован:", user.email);
+        // Если залогинен и сидит на входе -> перекидываем в мессенджер
         if (isLoginPage) {
             window.location.href = "general.html";
         } else {
-            // Если уже находится внутри мессенджера (general.html), запускаем базу данных
             initDatabaseListener();
         }
     } else {
-        console.log("Авторизация в кэше отсутствует.");
-        // Если сессии нет, а юзер сидит на закрытой странице general.html -> выкидываем на вход
+        console.log("Авторизация отсутствует.");
+        // If не залогинен и пытается открыть мессенджер -> выкидываем на вход
         if (!isLoginPage) {
             window.location.href = "index.html";
         }
@@ -50,40 +54,45 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ========================================================
-// 2. КНОПКИ
+// 2. ЛОГІКА КНОПКИ ВХОДУ (Защищенная)
 // ========================================================
-if (document.getElementById('login-btn')) {
-    document.getElementById('login-btn').addEventListener('click', async () => {
+if (loginBtn) {
+    loginBtn.addEventListener('click', async () => {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
         if (!email || !password) return alert("Заполните поля!");
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // Редирект сработает автоматически из функции onAuthStateChanged выше
         } catch (error) {
             alert("Ошибка входа: " + error.message);
         }
     });
 }
 
-if (document.getElementById('register-btn')) {
-    document.getElementById('register-btn').addEventListener('click', async () => {
+// ========================================================
+// 3. ЛОГІКА КНОПКИ РЕЕСТРАЦИИ (Защищенная)
+// ========================================================
+if (registerBtn) {
+    registerBtn.addEventListener('click', async () => {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
         if (!email || !password) return alert("Заполните поля!");
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            alert("Аккаунт успешно создан! Сейчас вас перенаправит.");
+            alert("Аккаунт успешно создан!");
         } catch (error) {
             alert("Ошибка регистрации: " + error.message);
         }
     });
 }
 
-if (document.getElementById('logout-btn')) {
-    document.getElementById('logout-btn').addEventListener('click', () => {
+// ========================================================
+// 4. ЛОГІКА КНОПКИ ВЫХОДА (Защищенная)
+// ========================================================
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
         signOut(auth).then(() => {
-            console.log("Вышли из системы. Перенаправление на вход...");
+            console.log("Вышли из системы.");
         });
     });
 }
@@ -91,6 +100,6 @@ if (document.getElementById('logout-btn')) {
 function initDatabaseListener() {
     const appStatusRef = ref(db, 'system/status');
     onValue(appStatusRef, (snapshot) => {
-        console.log("Связь с Realtime DB установлена.");
+        console.log("Связь с Realtime DB ок.");
     });
 }
