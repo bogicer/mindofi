@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. ОБЩИЕ СБРОСЫ И БАЗОВЫЕ СТИЛИ (Ваш оригинал + адаптивность)
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -6,62 +9,103 @@
 }
 
 body {
-    background: #0b2d5b;
+    background: #0b2d5b; /* Ваша фирменная подложка */
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Оболочка приложения — ограничиваем ширину под мобильный формат (430px) */
+.login-container, .app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #0b2d5b; /* Внутренний фон мессенджера */
+    position: relative;
+    padding-bottom: 90px; /* Отступ снизу, чтобы контент не перекрывался баром */
+}
+
+/* Хедеры и Логотип */
+header {
+    padding: 30px 20px 15px;
+}
+
+.logo {
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: 2px;
     color: #fff;
 }
 
-/* СТАНОВІ НАЛАШТУВАННЯ ЕКРАНІВ */
-#login-screen, #app-screen {
-    display: none; /* Контролюється через JS */
-}
-
-/* ЕКРАН АВТОРИЗАЦІЇ */
+/* ==========================================================================
+   2. СТИЛИ ДЛЯ ЭКРАНА АВТОРИЗАЦИИ (index.html)
+   ========================================================================== */
 .login-container {
-    max-width: 430px;
-    margin: auto;
-    min-height: 100vh;
-    padding: 50px 20px;
-    text-align: center;
+    padding: 60px 25px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .login-header {
-    padding: 25px 0 40px;
+    text-align: center;
+    padding-bottom: 40px;
 }
 
+.login-header .logo {
+    font-size: 46px;
+}
+
+/* Поля ввода */
 .login-input {
     width: 100%;
     border: none;
     outline: none;
     border-radius: 15px;
-    background: #7388A3;
-    padding: 14px;
+    background: #254a7b; /* Чуть светлее основного фона для контраста */
+    padding: 16px;
     color: #fff;
     font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
+    transition: background 0.3s, box-shadow 0.3s;
 }
 
 .login-input::placeholder {
-    color: #ddd;
+    color: #b0c4de;
 }
 
+.login-input:focus {
+    background: #2f5992;
+    box-shadow: 0 0 0 2px #4fc3ff; /* Голубое свечение при фокусе */
+}
+
+/* Кнопки авторизации */
 .login-btn {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     border-radius: 15px;
-    background: #4fc3ff;
+    background: #4fc3ff; /* Ваша фирменная голубая кнопка */
     border: none;
     color: #0b2d5b;
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.2s;
+    margin-top: 12px;
+    transition: background 0.2s, transform 0.1s;
 }
 
 .login-btn:hover {
-    background: #39b3f0;
+    background: #3cb0f0;
 }
 
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+/* Контурная кнопка для регистрации */
 .btn-register-outline {
     background: transparent;
     border: 2px solid #7388A3;
@@ -69,28 +113,15 @@ body {
 }
 
 .btn-register-outline:hover {
-    background: rgba(115, 136, 163, 0.2);
+    background: rgba(115, 136, 163, 0.15);
 }
 
-/* ГОЛОВНИЙ ДОДАТОК */
-.app {
-    max-width: 430px;
-    margin: auto;
-    min-height: 100vh;
-    position: relative;
-    padding-bottom: 90px;
-}
 
-header {
-    padding: 25px 20px 10px;
-}
+/* ==========================================================================
+   3. СТИЛИ ДЛЯ МЕССЕНДЖЕРА (general.html)
+   ========================================================================== */
 
-.logo {
-    font-size: 42px;
-    font-weight: 900;
-    letter-spacing: 2px;
-}
-
+/* Строка поиска */
 .search {
     padding: 0 20px 15px;
 }
@@ -100,32 +131,33 @@ header {
     border: none;
     outline: none;
     border-radius: 15px;
-    background: #7388A3;
+    background: #254a7b;
     padding: 14px;
     color: #fff;
     font-size: 16px;
 }
 
 .search input::placeholder {
-    color: #ddd;
+    color: #b0c4de;
 }
 
-/* STORIES */
+/* ИСТОРИИ (STORIES - Ваш оригинал) */
 .stories {
     display: flex;
     overflow-x: auto;
     gap: 18px;
     padding: 0 20px 20px;
-    scrollbar-width: none;
+    scrollbar-width: none; /* Прячем скроллбар в Firefox */
 }
 
 .stories::-webkit-scrollbar {
-    display: none;
+    display: none; /* Прячем скроллбар в Chrome/Safari/Electron */
 }
 
 .story {
     min-width: 72px;
     text-align: center;
+    cursor: pointer;
 }
 
 .story-ring {
@@ -147,15 +179,22 @@ header {
 .story p {
     margin-top: 8px;
     font-size: 13px;
+    color: #fff;
 }
 
-/* CHATS */
+/* СПИСОК ЧАТОВ (CHATS - Ваш оригинал) */
+.chats-list {
+    display: flex;
+    flex-direction: column;
+}
+
 .chat {
     display: flex;
     align-items: center;
     padding: 14px 20px;
     color: #fff;
     text-decoration: none;
+    transition: background 0.2s;
 }
 
 .chat:hover {
@@ -168,6 +207,7 @@ header {
     border-radius: 50%;
     background: #9FB0C7;
     margin-right: 14px;
+    flex-shrink: 0;
 }
 
 .info {
@@ -183,17 +223,24 @@ header {
     color: #ddd;
     margin-top: 4px;
     font-size: 14px;
+    /* Обрезка длинного текста троеточием */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px; 
 }
 
 .time {
     color: #ddd;
     font-size: 13px;
+    margin-left: 10px;
+    flex-shrink: 0;
 }
 
-/* КНОПКА ВИХОДУ */
+/* КНОПКА ВЫХОДА ИЗ АККАУНТА */
 .logout-container {
-    padding: 0 20px;
-    margin-top: 20px;
+    padding: 10px 20px;
+    margin-top: 15px;
 }
 
 .logout-btn {
@@ -209,10 +256,10 @@ header {
 }
 
 .logout-btn:hover {
-    background: #bd2130;
+    background: #c82333;
 }
 
-/* NAVBAR ВНИЗУ */
+/* НИЖНИЙ НАВИГАЦИОННЫЙ БАР (NAVBAR - Модернизированный оригинал) */
 .bottom {
     position: fixed;
     bottom: 15px;
@@ -224,7 +271,9 @@ header {
     border-radius: 18px;
     display: flex;
     justify-content: space-around;
-    padding: 12px 0;
+    padding: 10px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 100;
 }
 
 .bottom a {
@@ -233,9 +282,26 @@ header {
     font-size: 12px;
     font-weight: bold;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.2s;
 }
 
+.bottom a:hover {
+    opacity: 0.8;
+}
+
+/* Контейнер картинок-иконок внутри ссылок */
 .bottom span {
     display: block;
-    font-size: 23px;
+    width: 26px;
+    height: 26px;
+}
+
+.bottom span img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
