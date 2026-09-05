@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MINDOFI Messenger</title>
-    <!-- Підключаємо зовнішні стилі -->
+    <title>MINDOFI - Вхід</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ================= 1. ЕКРАН АВТОРИЗАЦІЇ ================= -->
+    <!-- На этой странице отображается ТОЛЬКО форма авторизации -->
     <div id="login-screen" class="login-container">
         <header class="login-header">
             <div class="logo">MINDOFI</div>
@@ -20,94 +19,7 @@
         <button id="register-btn" class="login-btn btn-register-outline">СТВОРІТИ АКАУНТ</button>
     </div>
 
-    <!-- ================= 2. ГОЛОВНИЙ ЕКРАН МЕСЕНДЖЕРА ================= -->
-    <div id="app-screen" class="app">
-        <header>
-            <div class="logo">MINDOFI</div>
-        </header>
-
-        <div class="search">
-            <input type="text" placeholder="Search">
-        </div>
-
-        <!-- ІСТОРІЇ (STORIES) -->
-        <div class="stories">
-            <div class="story">
-                <div class="story-ring"><div class="story-photo"></div></div>
-                <p>You</p>
-            </div>
-            <div class="story">
-                <div class="story-ring"><div class="story-photo"></div></div>
-                <p>John</p>
-            </div>
-            <div class="story">
-                <div class="story-ring"><div class="story-photo"></div></div>
-                <p>Alice</p>
-            </div>
-            <div class="story">
-                <div class="story-ring"><div class="story-photo"></div></div>
-                <p>Mike</p>
-            </div>
-        </div>
-
-        <!-- СПИСОК ЧАТІВ -->
-        <div class="chats-list">
-            <a href="chats.html" class="chat">
-                <div class="avatar"></div>
-                <div class="info">
-                    <div class="name">John</div>
-                    <div class="message">Hello! Welcome to FLYMESS.</div>
-                </div>
-                <div class="time">12:34</div>
-            </a>
-            <a href="chats.html" class="chat">
-                <div class="avatar"></div>
-                <div class="info">
-                    <div class="name">Alice</div>
-                    <div class="message">See you tomorrow 👋</div>
-                </div>
-                <div class="time">11:42</div>
-            </a>
-            <a href="chats.html" class="chat">
-                <div class="avatar"></div>
-                <div class="info">
-                    <div class="name">Mike</div>
-                    <div class="message">Okay 👍</div>
-                </div>
-                <div class="time">Yesterday</div>
-            </a>
-            <a href="news.html" class="chat">
-                <div class="avatar"></div>
-                <div class="info">
-                    <div class="name">MINDOFI News</div>
-                    <div class="message">Welcome to Beta!</div>
-                </div>
-                <div class="time">Mon</div>
-            </a>
-            <a href="support.html" class="chat">
-                <div class="avatar"></div>
-                <div class="info">
-                    <div class="name">Support</div>
-                    <div class="message">Need help?</div>
-                </div>
-                <div class="time">Sun</div>
-            </a>
-        </div>
-
-        <!-- КНОПКА ВИХОДУ З АКАУНТА -->
-        <div class="logout-container">
-            <button id="logout-btn" class="logout-btn">Вийти з акаунта</button>
-        </div>
-
-        <!-- НАВІГАЦІЙНА ПАНЕЛЬ ВНИЗУ З ОРИГІНАЛЬНИМИ ПОСИЛАННЯМИ ТА КАРТИНКАМИ -->
-        <div class="bottom">
-            <a href="index.html"><span><img src="chatf.png" alt=""></span>Chats</a>
-            <a href="profile.html"><span><img src="peoplef.png" alt=""></span>People</a>
-            <a href="settings.html"><span><img src="settingsf.png" alt=""></span>Settings</a>
-        </div>
-    </div>
-
-    <!-- Підключаємо відокремлену логіку як модуль -->
-    <script type="module" src="app.js"></script>
+    <!-- Подключаем нашу логику -->
+    <script type="module" src="desktop.js"></script>
 </body>
 </html>
