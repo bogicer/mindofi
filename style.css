@@ -1,160 +1,241 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-body{
-    background:#0b2d5b;
-    color:#fff;
+body {
+    background: #0b2d5b;
+    color: #fff;
 }
 
-.app{
-    max-width:430px;
-    margin:auto;
-    min-height:100vh;
-    position:relative;
-    padding-bottom:90px;
+/* СТАНОВІ НАЛАШТУВАННЯ ЕКРАНІВ */
+#login-screen, #app-screen {
+    display: none; /* Контролюється через JS */
 }
 
-header{
-    padding:25px 20px 10px;
+/* ЕКРАН АВТОРИЗАЦІЇ */
+.login-container {
+    max-width: 430px;
+    margin: auto;
+    min-height: 100vh;
+    padding: 50px 20px;
+    text-align: center;
 }
 
-.logo{
-    font-size:42px;
-    font-weight:900;
-    letter-spacing:2px;
+.login-header {
+    padding: 25px 0 40px;
 }
 
-.search{
-    padding:0 20px 15px;
+.login-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    border-radius: 15px;
+    background: #7388A3;
+    padding: 14px;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 15px;
 }
 
-.search input{
-    width:100%;
-    border:none;
-    outline:none;
-    border-radius:15px;
-    background:#7388A3;
-    padding:14px;
-    color:#fff;
-    font-size:16px;
+.login-input::placeholder {
+    color: #ddd;
 }
 
-.search input::placeholder{
-    color:#ddd;
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 15px;
+    background: #4fc3ff;
+    border: none;
+    color: #0b2d5b;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.login-btn:hover {
+    background: #39b3f0;
+}
+
+.btn-register-outline {
+    background: transparent;
+    border: 2px solid #7388A3;
+    color: #fff;
+}
+
+.btn-register-outline:hover {
+    background: rgba(115, 136, 163, 0.2);
+}
+
+/* ГОЛОВНИЙ ДОДАТОК */
+.app {
+    max-width: 430px;
+    margin: auto;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 90px;
+}
+
+header {
+    padding: 25px 20px 10px;
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.search {
+    padding: 0 20px 15px;
+}
+
+.search input {
+    width: 100%;
+    border: none;
+    outline: none;
+    border-radius: 15px;
+    background: #7388A3;
+    padding: 14px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.search input::placeholder {
+    color: #ddd;
 }
 
 /* STORIES */
-
-.stories{
-    display:flex;
-    overflow-x:auto;
-    gap:18px;
-    padding:0 20px 20px;
-    scrollbar-width:none;
+.stories {
+    display: flex;
+    overflow-x: auto;
+    gap: 18px;
+    padding: 0 20px 20px;
+    scrollbar-width: none;
 }
 
-.stories::-webkit-scrollbar{
-    display:none;
+.stories::-webkit-scrollbar {
+    display: none;
 }
 
-.story{
-    min-width:72px;
-    text-align:center;
+.story {
+    min-width: 72px;
+    text-align: center;
 }
 
-.story-ring{
-    width:72px;
-    height:72px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#4fc3ff,#fff,#4fc3ff);
-    padding:3px;
+.story-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4fc3ff, #fff, #4fc3ff);
+    padding: 3px;
 }
 
-.story-photo{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    background:#9FB0C7;
-    border:3px solid #0b2d5b;
+.story-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #9FB0C7;
+    border: 3px solid #0b2d5b;
 }
 
-.story p{
-    margin-top:8px;
-    font-size:13px;
+.story p {
+    margin-top: 8px;
+    font-size: 13px;
 }
 
 /* CHATS */
-
-.chat{
-    display:flex;
-    align-items:center;
-    padding:14px 20px;
-    color:#fff;
-    text-decoration:none;
+.chat {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    color: #fff;
+    text-decoration: none;
 }
 
-.chat:hover{
-    background:rgba(255,255,255,.05);
+.chat:hover {
+    background: rgba(255, 255, 255, .05);
 }
 
-.avatar{
-    width:58px;
-    height:58px;
-    border-radius:50%;
-    background:#9FB0C7;
-    margin-right:14px;
+.avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #9FB0C7;
+    margin-right: 14px;
 }
 
-.info{
-    flex:1;
+.info {
+    flex: 1;
 }
 
-.name{
-    font-size:18px;
-    font-weight:bold;
+.name {
+    font-size: 18px;
+    font-weight: bold;
 }
 
-.message{
-    color:#ddd;
-    margin-top:4px;
-    font-size:14px;
+.message {
+    color: #ddd;
+    margin-top: 4px;
+    font-size: 14px;
 }
 
-.time{
-    color:#ddd;
-    font-size:13px;
+.time {
+    color: #ddd;
+    font-size: 13px;
 }
 
-/* NAVBAR */
-
-.bottom{
-    position:fixed;
-    bottom:15px;
-    left:50%;
-    transform:translateX(-50%);
-    width:390px;
-    max-width:95%;
-    background:#fff;
-    border-radius:18px;
-    display:flex;
-    justify-content:space-around;
-    padding:12px 0;
+/* КНОПКА ВИХОДУ */
+.logout-container {
+    padding: 0 20px;
+    margin-top: 20px;
 }
 
-.bottom a{
-    text-decoration:none;
-    color:#0b2d5b;
-    font-size:12px;
-    font-weight:bold;
-    text-align:center;
-    opacity: 1;
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.bottom span{
-    display:block;
-    font-size:23px;
+.logout-btn:hover {
+    background: #bd2130;
+}
+
+/* NAVBAR ВНИЗУ */
+.bottom {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 390px;
+    max-width: 95%;
+    background: #fff;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+}
+
+.bottom a {
+    text-decoration: none;
+    color: #0b2d5b;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.bottom span {
+    display: block;
+    font-size: 23px;
 }
