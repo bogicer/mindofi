@@ -1,0 +1,34 @@
+/* FLYMESS PC desktop layer */
+html,body{min-width:900px;min-height:100%;}
+body{background:#081f42;}
+.app{max-width:none;width:100%;min-height:100vh;margin:0;padding-left:108px;padding-bottom:32px;}
+.logo{letter-spacing:2px;}
+.bottom{position:fixed;left:16px;top:16px;bottom:16px;transform:none;width:76px;max-width:none;background:#fff;border-radius:22px;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:18px 0;z-index:50;box-shadow:0 12px 35px rgba(0,0,0,.22);}
+.bottom a{display:flex;align-items:center;justify-content:center;width:100%;height:58px;}
+.bottom img{width:42px;height:42px;object-fit:contain;}
+header{padding:28px 34px 16px;}
+.search{padding:0 34px 18px;max-width:900px;}
+.search input{font-size:16px;}
+.stories{padding-left:34px;padding-right:34px;}
+.chat{padding:16px 34px;max-width:1000px;border-radius:14px;margin:2px 14px;}
+.chat:hover{background:rgba(255,255,255,.07);}
+
+/* Profile / contacts / settings */
+.app>.logo{margin-left:0;padding-top:6px;}
+.profile{max-width:760px;}
+.card,.item{max-width:760px;}
+.contact{max-width:900px;margin:2px 14px;border-radius:14px;}
+
+/* Chat window */
+body:has(.top) .app{padding:0;max-width:none;}
+body:has(.top) .top{height:78px;padding:15px 24px;}
+body:has(.top) .chat{max-width:none;margin:0;border-radius:0;padding:26px 12%;}
+body:has(.top) .bottom{position:fixed;left:0;right:0;bottom:0;top:auto;transform:none;width:auto;max-width:none;border-radius:0;padding:14px 10%;display:flex;flex-direction:row;background:#12396b;box-shadow:none;}
+body:has(.top) .bottom input{min-width:0;}
+body:has(.top) .msg{max-width:62%;}
+
+@media (max-width:1000px){
+  .app{padding-left:96px;}
+  .bottom{left:10px;width:68px;}
+  .chat{max-width:none;}
+}

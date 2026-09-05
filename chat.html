@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="chat.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLYMESS Chat</title>
+<link rel="stylesheet" href="pc.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="top">
+
+<div class="back" onclick="history.back()">←</div>
+
+<div class="avatar"></div>
+
+<div class="info">
+<div class="name">John</div>
+<div class="status">online</div>
+</div>
+
+<div class="menu">⋮</div>
+
+</div>
+
+<div class="chat">
+
+<div class="date">Today</div>
+
+<div class="msg left">
+Hello 👋
+</div>
+
+<div class="msg right">
+Hi!
+</div>
+
+<div class="msg left">
+Welcome to FLYMESS Beta.
+</div>
+
+<div class="msg right">
+Looks awesome 🔥
+</div>
+
+<div class="msg left">
+This is only a placeholder page.
+</div>
+
+</div>
+
+<div class="bottom">
+
+<input type="text" placeholder="Message">
+
+<button class="send">➤</button>
+
+</div>
+
+</div>
+
+<script>
+const params=new URLSearchParams(location.search);
+const user=params.get('user');
+if(user){document.querySelector('.top .name').textContent=user;document.title='FLYMESS - '+user;}
+</script>
+<script src="desktop.js"></script>
+</body>
+</html>
