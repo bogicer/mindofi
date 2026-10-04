@@ -1,8 +1,7 @@
 // ============================================================
-//  MINDOFI — Основная логика приложения
+//  MINDOFI — Основная логика
 // ============================================================
 
-// ===== СОСТОЯНИЕ =====
 let currentUser = null;
 let currentToken = null;
 let activeChat = null;
@@ -13,7 +12,6 @@ let searchFilter = '';
 let pollingTimer = null;
 let newAvatarBase64 = null;
 
-// ===== ЗВОНКИ =====
 let pc = null;
 let localStream = null;
 let remoteStream = null;
@@ -31,7 +29,6 @@ let camOff = false;
 let watchInterval = null;
 let ringtoneCtx = null;
 
-// STUN/TURN
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -43,7 +40,7 @@ const ICE_CONFIG = {
 };
 
 // ============================================================
-//  ИНИЦИАЛИЗАЦИЯ
+//  INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', init);
 
@@ -63,11 +60,16 @@ async function init() {
     return;
   }
 
-  // Восстанавливаем свежие данные о пользователе
   await refreshMe();
-
   applyTheme();
   renderMe();
+
+  // Мобильные: сайдбар закрыт, оверлей скрыт
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+
   await loadUsers();
   renderChatList();
   startPolling();
@@ -77,7 +79,13 @@ async function init() {
     updatePresence(false);
   });
 
-  // Авторасширение textarea
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+  });
+
   const ta = document.getElementById('messageInput');
   if (ta) {
     ta.addEventListener('input', function() {
@@ -92,7 +100,6 @@ async function init() {
     });
   }
 
-  // Закрытие модалок по клику вне
   document.querySelectorAll('.modal').forEach(m => {
     m.addEventListener('click', (e) => {
       if (e.target === m) m.style.display = 'none';
@@ -118,9 +125,7 @@ async function apiRequest(path, method = 'GET', data = null) {
     'X-Session-Token': currentToken,
     'ngrok-skip-browser-warning': 'true'
   };
-
   const opts = { method, headers };
-
   if (data) {
     headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(data);
@@ -166,19 +171,23 @@ function toggleTheme() {
 //  МОЙ ПРОФИЛЬ
 // ============================================================
 function renderMe() {
+  if (!currentUser) return;
+
   const meName = document.getElementById('meName');
   const meAvatar = document.getElementById('meAvatar');
   const meStatus = document.getElementById('meStatus');
-
-  if (!currentUser) return;
+  const mobileAvatar = document.getElementById('mobileProfileAvatar');
 
   meName.textContent = currentUser.name || 'Без имени';
   meStatus.textContent = 'В сети';
 
   if (currentUser.photoURL) {
     meAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" alt="">';
+    if (mobileAvatar) mobileAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
   } else {
-    meAvatar.textContent = (currentUser.name || '?')[0].toUpperCase();
+    const letter = (currentUser.name || '?')[0].toUpperCase();
+    meAvatar.textContent = letter;
+    if (mobileAvatar) mobileAvatar.textContent = letter;
   }
 }
 
@@ -193,7 +202,6 @@ async function loadUsers() {
   for (const chatId in chats) {
     const parts = chatId.split('_');
     if (parts.length !== 2) continue;
-
     const otherPhone = parts[0] === currentUser.phone ? parts[1] : parts[0];
     if (otherPhone === currentUser.phone) continue;
 
@@ -216,15 +224,12 @@ function renderChatList() {
   list.innerHTML = '';
 
   const chatItems = [];
-
   for (const phone in users) {
     const u = users[phone];
     if (!u) continue;
-
     const chatId = getChatId(phone);
     const msgs = messages[chatId] || [];
     const lastMsg = msgs[msgs.length - 1];
-
     chatItems.push({ phone, user: u, lastMsg, chatId });
   }
 
@@ -268,7 +273,6 @@ function renderChatList() {
       const typeLabels = { voice: '🎤 Голосовое', krujok: '📹 Кружок', image: '📷 Фото', file: '📎 Файл' };
       preview = typeLabels[item.lastMsg.type] || item.lastMsg.text || '...';
     }
-
     const time = item.lastMsg ? formatTime(item.lastMsg.timestamp) : '';
 
     el.innerHTML = avatarHTML +
@@ -308,6 +312,7 @@ async function openChat(phone) {
 
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
   }
 }
 
@@ -329,7 +334,6 @@ async function loadMessages(phone) {
       (a.timestamp || 0) - (b.timestamp || 0)
     );
   }
-
   renderMessages(phone);
 }
 
@@ -351,7 +355,6 @@ function renderMessages(phone) {
     el.className = 'message ' + (isOut ? 'out' : 'in');
 
     let content = '';
-
     if (m.type === 'image' && m.url) {
       content = '<div class="message-image" onclick="openImage(\'' + m.url + '\')"><img src="' + m.url + '" loading="lazy"></div>';
     } else if (m.type === 'voice' && m.url) {
@@ -365,11 +368,9 @@ function renderMessages(phone) {
       content = escapeHtml(m.text || '');
     }
 
-    const time = formatTime(m.timestamp);
-
     el.innerHTML = '<div class="message-bubble">' +
       content +
-      '<div class="message-time">' + time + '</div>' +
+      '<div class="message-time">' + formatTime(m.timestamp) + '</div>' +
     '</div>';
 
     container.appendChild(el);
@@ -379,7 +380,7 @@ function renderMessages(phone) {
 }
 
 // ============================================================
-//  ОТПРАВКА СООБЩЕНИЯ
+//  ОТПРАВКА
 // ============================================================
 async function sendMessage() {
   const input = document.getElementById('messageInput');
@@ -423,21 +424,16 @@ async function onFilePick(input) {
   }
 
   toast('Загрузка...');
-
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1];
     const isImage = file.type.startsWith('image/');
-
     const res = await apiRequest('upload', 'POST', {
       image: base64,
       type: isImage ? 'image' : 'file'
     });
 
-    if (!res || !res.url) {
-      toast('Ошибка загрузки');
-      return;
-    }
+    if (!res || !res.url) { toast('Ошибка загрузки'); return; }
 
     const chatId = getChatId(activeChat);
     const msgId = Date.now() + '_f';
@@ -456,10 +452,8 @@ async function onFilePick(input) {
     if (!messages[chatId]) messages[chatId] = [];
     messages[chatId].push(msg);
     renderMessages(activeChat);
-
     await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
   };
-
   reader.readAsDataURL(file);
   input.value = '';
 }
@@ -467,13 +461,8 @@ async function onFilePick(input) {
 // ============================================================
 //  МОДАЛКИ
 // ============================================================
-function openModal(id) {
-  document.getElementById(id).style.display = 'flex';
-}
-
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
-}
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
 function openNewChat() {
   openModal('newChatModal');
@@ -481,32 +470,35 @@ function openNewChat() {
 }
 
 // ============================================================
-//  ПОИСК ПОЛЬЗОВАТЕЛЕЙ
+//  SIDEBAR
+// ============================================================
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const isOpen = sb.classList.toggle('open');
+  ov.classList.toggle('show', isOpen);
+}
+
+// ============================================================
+//  ПОИСК
 // ============================================================
 async function searchUsers(query) {
   const results = document.getElementById('userSearchResults');
-  if (!query || query.length < 2) {
-    results.innerHTML = '';
-    return;
-  }
-
+  if (!query || query.length < 2) { results.innerHTML = ''; return; }
   results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Поиск...</div>';
 
   const username = query.replace(/^@/, '');
   const phone = await apiRequest('usernames/' + username);
 
   if (!phone) {
-    // Ищем в локальном кэше
     const found = Object.entries(users).filter(([p, u]) =>
       (u.username || '').toLowerCase().includes(username.toLowerCase()) ||
       (u.name || '').toLowerCase().includes(username.toLowerCase())
     );
-
     if (!found.length) {
       results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
       return;
     }
-
     results.innerHTML = '';
     found.forEach(([p, u]) => renderSearchResult(p, u, results));
     return;
@@ -551,12 +543,9 @@ function renderSearchResult(phone, u, container) {
 }
 
 // ============================================================
-//  ФИЛЬТР И ВКЛАДКИ
+//  ФИЛЬТРЫ
 // ============================================================
-function filterChats(value) {
-  searchFilter = value;
-  renderChatList();
-}
+function filterChats(value) { searchFilter = value; renderChatList(); }
 
 function switchTab(tab) {
   currentTab = tab;
@@ -567,7 +556,7 @@ function switchTab(tab) {
 }
 
 // ============================================================
-//  НАСТРОЙКИ ПРОФИЛЯ
+//  ПРОФИЛЬ
 // ============================================================
 function openSettingsModal() {
   if (!currentUser) return;
@@ -601,11 +590,7 @@ function openSettingsModal() {
 function onSettingsAvatarPick(input) {
   const file = input.files[0];
   if (!file) return;
-
-  if (file.size > 2 * 1024 * 1024) {
-    toast('Аватар должен быть до 2 МБ');
-    return;
-  }
+  if (file.size > 2 * 1024 * 1024) { toast('Аватар до 2 МБ'); return; }
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -623,23 +608,14 @@ async function saveProfile() {
   const bio = document.getElementById('settingsBio').value.trim();
   const birthday = document.getElementById('settingsBirthday').value;
 
-  if (!name) {
-    toast('Имя не может быть пустым');
-    return;
-  }
+  if (!name) { toast('Имя не может быть пустым'); return; }
 
   if (birthday) {
     const bd = new Date(birthday);
     const now = new Date();
     const age = (now - bd) / (1000 * 60 * 60 * 24 * 365.25);
-    if (age < 13) {
-      toast('Возраст должен быть не менее 13 лет');
-      return;
-    }
-    if (age > 120) {
-      toast('Неверная дата рождения');
-      return;
-    }
+    if (age < 13) { toast('Возраст менее 13 лет'); return; }
+    if (age > 120) { toast('Неверная дата'); return; }
   }
 
   let newPhotoUrl = currentUser.photoURL;
@@ -648,12 +624,8 @@ async function saveProfile() {
       image: newAvatarBase64,
       type: 'image'
     });
-    if (up && up.url) {
-      newPhotoUrl = up.url;
-    } else {
-      toast('Не удалось загрузить аватар');
-      return;
-    }
+    if (up && up.url) newPhotoUrl = up.url;
+    else { toast('Не удалось загрузить аватар'); return; }
   }
 
   const patch = {
@@ -665,10 +637,7 @@ async function saveProfile() {
   };
 
   const res = await apiRequest('users/' + currentUser.phone, 'PATCH', patch);
-  if (!res) {
-    toast('Ошибка сохранения');
-    return;
-  }
+  if (!res) { toast('Ошибка сохранения'); return; }
 
   currentUser.name = name;
   currentUser.username = username ? '@' + username : null;
@@ -687,24 +656,11 @@ async function changePassword() {
   const nw = document.getElementById('settingsNewPwd').value;
   const rep = document.getElementById('settingsRepeatPwd').value;
 
-  if (nw.length < 6) {
-    toast('Новый пароль минимум 6 символов');
-    return;
-  }
-  if (nw !== rep) {
-    toast('Пароли не совпадают');
-    return;
-  }
+  if (nw.length < 6) { toast('Пароль минимум 6 символов'); return; }
+  if (nw !== rep) { toast('Пароли не совпадают'); return; }
 
-  const res = await apiRequest('auth/set-password', 'POST', {
-    current: cur,
-    new: nw
-  });
-
-  if (!res || !res.success) {
-    toast(res && res.error ? res.error : 'Ошибка');
-    return;
-  }
+  const res = await apiRequest('auth/set-password', 'POST', { current: cur, new: nw });
+  if (!res || !res.success) { toast(res && res.error ? res.error : 'Ошибка'); return; }
 
   document.getElementById('settingsCurrentPwd').value = '';
   document.getElementById('settingsNewPwd').value = '';
@@ -720,12 +676,9 @@ function startPolling() {
   pollingTimer = setInterval(async () => {
     updatePresence(true);
     await loadUsers();
-    if (activeChat) {
-      await loadMessages(activeChat);
-    }
+    if (activeChat) await loadMessages(activeChat);
     renderChatList();
   }, 3000);
-
   updatePresence(true);
 }
 
@@ -782,13 +735,7 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function openImage(url) {
-  window.open(url, '_blank');
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
+function openImage(url) { window.open(url, '_blank'); }
 
 function openProfile() {
   if (!activeChat) return;
@@ -798,7 +745,7 @@ function openProfile() {
 }
 
 // ============================================================
-//  ЗВОНКИ (WebRTC)
+//  ЗВОНКИ
 // ============================================================
 async function initCall(type) {
   if (!activeChat) { toast('Выберите чат'); return; }
@@ -871,29 +818,24 @@ async function initCall(type) {
       hangUp();
       return;
     }
-
     const callData = await apiRequest('calls/' + callId);
     if (!callData) return;
-
     if (callData.status === 'declined') {
       clearInterval(callPollInterval);
-      toast('Звонок отклонён');
+      toast('Отклонён');
       hangUp();
       return;
     }
-
     if (callData.answer && pc && pc.signalingState === 'have-local-offer') {
       clearInterval(callPollInterval);
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(callData.answer)));
-
         const cands = await apiRequest('ice/' + callId);
         if (cands) {
           for (const cid in cands) {
             try { await pc.addIceCandidate(new RTCIceCandidate(cands[cid])); } catch (e) {}
           }
         }
-
         startCallTimer();
         document.getElementById('callStatus').style.display = 'none';
         document.getElementById('callTimer').style.display = 'block';
@@ -917,7 +859,7 @@ async function acceptCall() {
       : { audio: true, video: false };
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    toast('Нет доступа к устройству');
+    toast('Нет доступа');
     await apiRequest('calls/' + callId, 'PATCH', { status: 'declined' });
     resetCall();
     return;
@@ -954,17 +896,14 @@ async function acceptCall() {
 
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.offer)));
-
     const cands = await apiRequest('ice/' + callId);
     if (cands) {
       for (const cid in cands) {
         try { await pc.addIceCandidate(new RTCIceCandidate(cands[cid])); } catch (e) {}
       }
     }
-
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-
     await apiRequest('calls/' + callId, 'PATCH', {
       answer: JSON.stringify(answer),
       status: 'connected'
@@ -984,10 +923,9 @@ async function acceptCall() {
         }
       }
     }, 1500);
-
   } catch (e) {
     console.error(e);
-    toast('Ошибка соединения');
+    toast('Ошибка');
     hangUp();
   }
 
@@ -1022,7 +960,6 @@ async function hangUp() {
 
   document.getElementById('callScreen').style.display = 'none';
   document.getElementById('incomingCall').style.display = 'none';
-
   resetCall();
 }
 
@@ -1043,7 +980,6 @@ function resetCall() {
 
 function showCallScreen(type, role, user) {
   document.getElementById('callScreen').style.display = 'flex';
-
   const callAvatar = document.getElementById('callAvatar');
   const callName = document.getElementById('callName');
   const callStatus = document.getElementById('callStatus');
