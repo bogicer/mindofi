@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>KoderDigital</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <div class="guilds" id="guilds"></div>
+    <div class="channels">
+      <h2 id="guildName">—</h2>
+      <div id="channelsList"></div>
+    </div>
+    <div class="main">
+      <div class="main-header" id="mainHeader">
+        <span id="mainHeaderIcon">🔊</span>
+        <span id="mainHeaderText">Выберите канал</span>
+      </div>
+      <div class="participants" id="participants">
+        <div class="empty">Выберите голосовой канал слева, чтобы присоединиться</div>
+      </div>
+      <div class="bottom-bar">
+        <div class="me">
+          <div class="user-avatar" id="meAvatar">?</div>
+          <span id="meName">—</span>
+        </div>
+        <button class="btn-leave" id="leaveBtn" style="display:none;">Отключиться</button>
+      </div>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
