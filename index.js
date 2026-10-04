@@ -73,7 +73,8 @@ async function apiPost(path, data) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Api-Key': CONFIG.API_KEY
+        'X-Api-Key': CONFIG.API_KEY,
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify(data)
     });
