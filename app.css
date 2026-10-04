@@ -1,5 +1,7 @@
 /* ============================================================
    MINDOFI — Стили основного приложения
+   Светлая тема: белый фон + чёрный текст
+   Тёмная тема: тёмно-синий фон + белый текст
    ============================================================ */
 
 * {
@@ -66,7 +68,7 @@ button, input, textarea {
 }
 
 /* ============================================================
-   ОСНОВНОЙ LAYOUT
+   LAYOUT
    ============================================================ */
 .app {
   display: flex;
@@ -127,6 +129,7 @@ button, input, textarea {
   justify-content: center;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
 }
 
 .icon-btn:hover {
@@ -205,6 +208,15 @@ button, input, textarea {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
+}
+
+.chat-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }
 
 .chat-item {
@@ -304,6 +316,13 @@ button, input, textarea {
   gap: 10px;
   cursor: pointer;
   min-width: 0;
+  padding: 4px 6px;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.me:hover {
+  background: var(--hover);
 }
 
 .me-avatar {
@@ -619,9 +638,18 @@ button, input, textarea {
   border-radius: 20px;
   width: 100%;
   max-width: 420px;
-  max-height: 85vh;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow);
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }
 
 .modal-header {
@@ -630,6 +658,10 @@ button, input, textarea {
   justify-content: space-between;
   padding: 18px 20px;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 1;
 }
 
 .modal-header h3 {
@@ -671,18 +703,174 @@ button, input, textarea {
   background: var(--hover);
 }
 
-.settings-list {
+/* ============================================================
+   НАСТРОЙКИ ПРОФИЛЯ
+   ============================================================ */
+.settings-modal-content {
+  max-width: 460px;
+}
+
+.settings-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 12px;
+}
+
+.settings-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+
+.settings-avatar:hover {
+  transform: scale(1.03);
+}
+
+.settings-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.settings-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.settings-avatar:hover .settings-avatar-overlay {
+  opacity: 1;
+}
+
+.settings-avatar-overlay svg {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 10px;
+}
+
+.settings-field {
   padding: 8px 20px;
+}
+
+.settings-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-field input,
+.settings-field textarea {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  resize: none;
+}
+
+.settings-field input:focus,
+.settings-field textarea:focus {
+  border-color: var(--accent);
+}
+
+.settings-counter {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+.btn-primary, .btn-secondary {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 12px 20px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--hover);
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 20px;
+}
+
+.settings-section-title {
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .settings-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 4px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.15s;
 }
 
 .settings-item:last-child {
@@ -690,7 +878,15 @@ button, input, textarea {
 }
 
 .settings-item:hover {
+  background: var(--hover);
   color: var(--accent);
+}
+
+.settings-footer {
+  padding: 16px;
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
 }
 
 /* ============================================================
@@ -818,8 +1014,16 @@ button, input, textarea {
   background: #dc2626;
 }
 
+.call-btn.end:hover {
+  background: #b91c1c;
+}
+
 .call-btn.accept {
   background: #16a34a;
+}
+
+.call-btn.accept:hover {
+  background: #15803d;
 }
 
 .call-btn.muted {
@@ -894,28 +1098,37 @@ button, input, textarea {
     transform: translateX(-100%);
     box-shadow: var(--shadow);
   }
-  
+
   .sidebar.open {
     transform: translateX(0);
   }
-  
+
   .mobile-only {
     display: flex;
   }
-  
+
   .message {
     max-width: 85%;
   }
-  
+
   #localVideo {
     width: 80px;
     height: 110px;
     bottom: 100px;
   }
-  
+
   .call-avatar {
     width: 90px;
     height: 90px;
     font-size: 34px;
+  }
+
+  .empty-logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .empty-title {
+    font-size: 24px;
   }
 }
