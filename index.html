@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINDOFI</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+
+  <div class="card">
+    <img src="logo.png" alt="MINDOFI" class="logo">
+    <h1 class="title">MINDOFI</h1>
+    <p class="subtitle">Безопасный мессенджер</p>
+
+    <div class="error" id="errBox"></div>
+    <div class="success" id="okBox"></div>
+
+    <!-- ЭКРАН 1: телефон -->
+    <div class="screen active" id="screenPhone">
+      <div class="phone-row">
+        <select class="country-select" id="countrySelect">
+          <option value="380">🇺🇦 +380</option>
+          <option value="7">🇷🇺 +7</option>
+          <option value="998">🇺🇿 +998</option>
+          <option value="1">🇺🇸 +1</option>
+          <option value="44">🇬🇧 +44</option>
+          <option value="49">🇩🇪 +49</option>
+          <option value="48">🇵🇱 +48</option>
+        </select>
+        <input class="phone-input" id="phoneInput" type="tel" maxlength="15" placeholder="50 123 45 67">
+      </div>
+      <button class="btn" id="phoneBtn" onclick="sendOtp()">Продолжить</button>
+      <div class="link">
+        <a id="modeLink" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</a>
+      </div>
+    </div>
+
+    <!-- ЭКРАН 2: OTP -->
+    <div class="screen" id="screenOtp">
+      <p class="hint" id="otpHint">Код отправлен на +380...</p>
+      <div class="otp-row">
+        <input class="otp-input" id="o1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
+        <input class="otp-input" id="o2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
+        <input class="otp-input" id="o3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)">
+        <input class="otp-input" id="o4" maxlength="1" inputmode="numeric" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
+        <input class="otp-input" id="o5" maxlength="1" inputmode="numeric" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
+      </div>
+      <button class="btn" onclick="verifyOtp()">Подтвердить</button>
+      <div class="link"><a onclick="goBack('phone')">← Назад</a></div>
+    </div>
+
+    <!-- ЭКРАН 3: регистрация -->
+    <div class="screen" id="screenName">
+      <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
+        <div class="plus">+</div>
+        <div class="avatar-label">Фото</div>
+        <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="onAvatarPick(this)">
+      </div>
+      <div class="field">
+        <input class="text-input" id="nameInput" maxlength="40" placeholder="Ваше имя">
+      </div>
+      <div class="field">
+        <input class="text-input" id="usernameInput" maxlength="30" placeholder="@username (необязательно)">
+      </div>
+      <button class="btn" onclick="doRegister()">Создать аккаунт</button>
+      <div class="link"><a onclick="goBack('phone')">← Назад</a></div>
+    </div>
+
+  </div>
+
+  <script src="config.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
