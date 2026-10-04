@@ -1,3 +1,3 @@
 const CONFIG = {
-  SERVER_WS: "wss://silent-sloths-show.loca.lt"
+  SERVER_WS: "wss://curator-sip-mobilize.ngrok-free.dev"
 };
