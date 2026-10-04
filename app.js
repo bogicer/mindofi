@@ -634,10 +634,477 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 //  ЗВОНКИ (заглушки — часть 2)
 // ============================================================
-function initCall(type) { toast('Звонки в разработке (часть 2)'); }
-function hangUp() {}
-function toggleMute() {}
-function toggleCam() {}
-function acceptCall() {}
-function declineCall() {}
-function startCallWatcher() {}
+// ============================================================
+//  ЗВОНКИ (WebRTC)
+// ============================================================
+let pc = null;                    // RTCPeerConnection
+let localStream = null;           // мой поток
+let remoteStream = null;          // чужой поток
+let callType = 'audio';           // 'audio' | 'video'
+let callRole = 'caller';          // 'caller' | 'callee'
+let callTarget = null;            // phone собеседника
+let callId = null;                // ID звонка
+let callSec = 0;                  // длительность
+let callTimerInterval = null;     // таймер
+let callPollInterval = null;      // polling для ответа
+let incomingCallId = null;        // ID входящего
+let incomingCallData = null;      // данные входящего
+let muteOn = false;
+let camOff = false;
+let watchInterval = null;         // watcher для входящих
+
+// ===== STUN-серверы =====
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:openrelay.metered.ca:80' },
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ]
+};
+
+// ============================================================
+//  ИНИЦИИРОВАТЬ ЗВОНОК (я звоню)
+// ============================================================
+async function initCall(type) {
+  if (!activeChat) {
+    toast('Выберите чат');
+    return;
+  }
+  if (pc) {
+    toast('Уже идёт звонок');
+    return;
+  }
+
+  callType = type;
+  callRole = 'caller';
+  callTarget = activeChat;
+  callId = [currentUser.phone, callTarget].sort().join('_') + '_call';
+
+  // Запрашиваем медиа
+  try {
+    const constraints = type === 'video'
+      ? { audio: true, video: { facingMode: 'user', width: 640, height: 480 } }
+      : { audio: true, video: false };
+
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (e) {
+    toast('Нет доступа к ' + (type === 'video' ? 'камере' : 'микрофону'));
+    return;
+  }
+
+  // Создаём соединение
+  pc = new RTCPeerConnection(ICE_CONFIG);
+
+  // Добавляем мои треки
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  // Мой видео-превью, если видео
+  const localVideo = document.getElementById('localVideo');
+  if (type === 'video') {
+    localVideo.srcObject = localStream;
+    localVideo.style.display = 'block';
+  } else {
+    localVideo.style.display = 'none';
+  }
+
+  // Получаем чужие треки
+  const remoteVideo = document.getElementById('remoteVideo');
+  pc.ontrack = (event) => {
+    if (event.streams && event.streams[0]) {
+      remoteStream = event.streams[0];
+      remoteVideo.srcObject = remoteStream;
+      remoteVideo.play().catch(() => {});
+    }
+  };
+
+  // Отправляем ICE-кандидатов на сервер
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      apiRequest('ice/' + callId, 'POST', {
+        candidate: JSON.stringify(event.candidate),
+        type: 'caller'
+      });
+    }
+  };
+
+  // Создаём offer
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  // Отправляем на сервер
+  await apiRequest('calls/' + callId, 'POST', {
+    caller: currentUser.phone,
+    callee: callTarget,
+    callType: type,
+    status: 'calling',
+    offer: JSON.stringify(offer),
+    ts: Date.now()
+  });
+
+  // Показываем экран звонка
+  showCallScreen(type, 'caller', users[callTarget]);
+
+  // Polling — ждём ответа или отклонения (макс 40 секунд)
+  let tries = 0;
+  callPollInterval = setInterval(async () => {
+    tries++;
+    if (tries > 40) {
+      clearInterval(callPollInterval);
+      toast('Нет ответа');
+      hangUp();
+      return;
+    }
+
+    const callData = await apiRequest('calls/' + callId);
+    if (!callData) return;
+
+    if (callData.status === 'declined') {
+      clearInterval(callPollInterval);
+      toast('Звонок отклонён');
+      hangUp();
+      return;
+    }
+
+    // Получили ответ — устанавливаем соединение
+    if (callData.answer && pc && pc.signalingState === 'have-local-offer') {
+      clearInterval(callPollInterval);
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(callData.answer)));
+
+        // Подгружаем ICE-кандидатов собеседника
+        const cands = await apiRequest('ice/' + callId);
+        if (cands) {
+          for (const cid in cands) {
+            try {
+              await pc.addIceCandidate(new RTCIceCandidate(cands[cid]));
+            } catch (e) {}
+          }
+        }
+
+        startCallTimer();
+        document.getElementById('callStatus').style.display = 'none';
+        document.getElementById('callTimer').style.display = 'block';
+      } catch (e) {
+        console.error('setRemoteDescription error:', e);
+      }
+    }
+  }, 1000);
+}
+
+// ============================================================
+//  ОТВЕТИТЬ НА ВХОДЯЩИЙ
+// ============================================================
+async function acceptCall() {
+  document.getElementById('incomingCall').style.display = 'none';
+  if (!incomingCallId || !incomingCallData) return;
+
+  callId = incomingCallId;
+  callType = incomingCallData.call_type || 'audio';
+  callRole = 'callee';
+  callTarget = incomingCallData.caller;
+
+  // Запрашиваем медиа
+  try {
+    const constraints = callType === 'video'
+      ? { audio: true, video: { facingMode: 'user', width: 640, height: 480 } }
+      : { audio: true, video: false };
+
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+  } catch (e) {
+    toast('Нет доступа к устройству');
+    await apiRequest('calls/' + callId, 'PATCH', { status: 'declined' });
+    resetCall();
+    return;
+  }
+
+  pc = new RTCPeerConnection(ICE_CONFIG);
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  const localVideo = document.getElementById('localVideo');
+  if (callType === 'video') {
+    localVideo.srcObject = localStream;
+    localVideo.style.display = 'block';
+  } else {
+    localVideo.style.display = 'none';
+  }
+
+  const remoteVideo = document.getElementById('remoteVideo');
+  pc.ontrack = (event) => {
+    if (event.streams && event.streams[0]) {
+      remoteStream = event.streams[0];
+      remoteVideo.srcObject = remoteStream;
+      remoteVideo.play().catch(() => {});
+    }
+  };
+
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      apiRequest('ice/' + callId, 'POST', {
+        candidate: JSON.stringify(event.candidate),
+        type: 'callee'
+      });
+    }
+  };
+
+  // Устанавливаем offer собеседника
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.offer)));
+
+    // Подгружаем ICE
+    const cands = await apiRequest('ice/' + callId);
+    if (cands) {
+      for (const cid in cands) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(cands[cid]));
+        } catch (e) {}
+      }
+    }
+
+    // Создаём answer
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    // Отправляем answer на сервер
+    await apiRequest('calls/' + callId, 'PATCH', {
+      answer: JSON.stringify(answer),
+      status: 'connected'
+    });
+
+    showCallScreen(callType, 'callee', users[callTarget]);
+    startCallTimer();
+    document.getElementById('callStatus').style.display = 'none';
+    document.getElementById('callTimer').style.display = 'block';
+
+    // Продолжаем принимать ICE от собеседника
+    const icePoll = setInterval(async () => {
+      if (!pc) {
+        clearInterval(icePoll);
+        return;
+      }
+      const c = await apiRequest('ice/' + callId);
+      if (c) {
+        for (const cid in c) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(c[cid]));
+          } catch (e) {}
+        }
+      }
+    }, 1500);
+
+  } catch (e) {
+    console.error('acceptCall error:', e);
+    toast('Ошибка соединения');
+    hangUp();
+  }
+
+  incomingCallId = null;
+  incomingCallData = null;
+}
+
+// ============================================================
+//  ОТКЛОНИТЬ ВХОДЯЩИЙ
+// ============================================================
+async function declineCall() {
+  document.getElementById('incomingCall').style.display = 'none';
+  if (incomingCallId) {
+    await apiRequest('calls/' + incomingCallId, 'PATCH', { status: 'declined' });
+  }
+  incomingCallId = null;
+  incomingCallData = null;
+}
+
+// ============================================================
+//  ЗАВЕРШИТЬ ЗВОНОК
+// ============================================================
+async function hangUp() {
+  clearInterval(callTimerInterval);
+  clearInterval(callPollInterval);
+  callTimerInterval = null;
+  callPollInterval = null;
+
+  // Закрываем соединение
+  if (pc) {
+    try { pc.close(); } catch (e) {}
+    pc = null;
+  }
+
+  // Останавливаем треки
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+
+  // Очищаем видео
+  const rv = document.getElementById('remoteVideo');
+  const lv = document.getElementById('localVideo');
+  if (rv) { rv.srcObject = null; }
+  if (lv) { lv.srcObject = null; lv.style.display = 'none'; }
+
+  // Удаляем звонок с сервера
+  if (callId) {
+    await apiRequest('calls/' + callId, 'DELETE');
+  }
+
+  // Прячем экран звонка
+  document.getElementById('callScreen').style.display = 'none';
+  document.getElementById('incomingCall').style.display = 'none';
+
+  resetCall();
+}
+
+function resetCall() {
+  pc = null;
+  localStream = null;
+  remoteStream = null;
+  callId = null;
+  callTarget = null;
+  callSec = 0;
+  muteOn = false;
+  camOff = false;
+  const muteBtn = document.getElementById('muteBtn');
+  const camBtn = document.getElementById('camBtn');
+  if (muteBtn) muteBtn.classList.remove('muted');
+  if (camBtn) camBtn.classList.remove('muted');
+}
+
+// ============================================================
+//  ЭКРАН ЗВОНКА
+// ============================================================
+function showCallScreen(type, role, user) {
+  document.getElementById('callScreen').style.display = 'flex';
+
+  const callAvatar = document.getElementById('callAvatar');
+  const callName = document.getElementById('callName');
+  const callStatus = document.getElementById('callStatus');
+  const callTimer = document.getElementById('callTimer');
+
+  if (user && user.photoURL) {
+    callAvatar.innerHTML = '<img src="' + user.photoURL + '">';
+  } else {
+    callAvatar.textContent = (user && user.name ? user.name : '?')[0].toUpperCase();
+  }
+
+  callName.textContent = user ? user.name : callTarget;
+  callStatus.textContent = role === 'caller' ? 'Вызов...' : 'Соединение...';
+  callStatus.style.display = 'block';
+  callTimer.style.display = 'none';
+  callTimer.textContent = '00:00';
+}
+
+function startCallTimer() {
+  callSec = 0;
+  clearInterval(callTimerInterval);
+  callTimerInterval = setInterval(() => {
+    callSec++;
+    const m = String(Math.floor(callSec / 60)).padStart(2, '0');
+    const s = String(callSec % 60).padStart(2, '0');
+    document.getElementById('callTimer').textContent = m + ':' + s;
+  }, 1000);
+}
+
+// ============================================================
+//  УПРАВЛЕНИЕ
+// ============================================================
+function toggleMute() {
+  muteOn = !muteOn;
+  if (localStream) {
+    localStream.getAudioTracks().forEach(t => t.enabled = !muteOn);
+  }
+  document.getElementById('muteBtn').classList.toggle('muted', muteOn);
+}
+
+function toggleCam() {
+  camOff = !camOff;
+  if (localStream) {
+    localStream.getVideoTracks().forEach(t => t.enabled = !camOff);
+  }
+  document.getElementById('camBtn').classList.toggle('muted', camOff);
+}
+
+// ============================================================
+//  WATCHER — проверка входящих звонков
+// ============================================================
+function startCallWatcher() {
+  clearInterval(watchInterval);
+  watchInterval = setInterval(async () => {
+    if (pc || !currentUser) return;  // уже в звонке
+    if (document.getElementById('incomingCall').style.display === 'flex') return;
+
+    const calls = await apiRequest('calls');
+    if (!calls) return;
+
+    for (const id in calls) {
+      const c = calls[id];
+      if (!c || c.callee !== currentUser.phone) continue;
+      if (c.status !== 'calling') continue;
+      if (Date.now() - Number(c.ts) > 60000) continue;
+
+      // Показываем входящий
+      incomingCallId = id;
+      incomingCallData = c;
+      showIncoming(c);
+      break;
+    }
+  }, 2000);
+}
+
+function showIncoming(callData) {
+  const caller = users[callData.caller];
+  const avatar = document.getElementById('incomingAvatar');
+  const name = document.getElementById('incomingName');
+  const type = document.getElementById('incomingType');
+
+  if (caller && caller.photoURL) {
+    avatar.innerHTML = '<img src="' + caller.photoURL + '">';
+  } else {
+    avatar.textContent = (caller && caller.name ? caller.name : '?')[0].toUpperCase();
+  }
+
+  name.textContent = caller ? caller.name : callData.caller;
+  type.textContent = callData.call_type === 'video' ? '📹 Видеозвонок' : '📞 Аудиозвонок';
+
+  document.getElementById('incomingCall').style.display = 'flex';
+
+  // Звук — простой вибратор
+  try {
+    playRingtone();
+  } catch (e) {}
+}
+
+// ============================================================
+//  ЗВУК ВХОДЯЩЕГО ЗВОНКА
+// ============================================================
+let ringtoneCtx = null;
+
+function playRingtone() {
+  if (!ringtoneCtx) {
+    ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  const ctx = ringtoneCtx;
+  let count = 0;
+
+  const playBeep = () => {
+    if (count >= 6) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+    osc.start();
+    setTimeout(() => osc.stop(), 300);
+    count++;
+    setTimeout(playBeep, 700);
+  };
+  playBeep();
+}
