@@ -1,0 +1,317 @@
+/* ===== СБРОС ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== ЦВЕТА: СВЕТЛАЯ ТЕМА ===== */
+:root {
+  --bg: #ffffff;          /* фон */
+  --panel: #f5f7ff;       /* панель */
+  --text: #0a0a0a;        /* чёрный текст */
+  --text-2: #4a5568;      /* серый текст */
+  --accent: #1e3a8a;      /* тёмно-синий */
+  --accent-hover: #172e6e;
+  --border: #e2e8f0;
+  --input-bg: #ffffff;
+  --error: #dc2626;
+  --success: #16a34a;
+  --shadow: 0 10px 40px rgba(30, 58, 138, 0.08);
+}
+
+/* ===== ЦВЕТА: ТЁМНАЯ ТЕМА ===== */
+[data-theme="dark"] {
+  --bg: #0f1734;          /* тёмно-синий фон */
+  --panel: #1a2456;
+  --text: #ffffff;        /* белый текст */
+  --text-2: #a0aec0;
+  --accent: #4a5fe8;
+  --accent-hover: #6c5ce7;
+  --border: #2d3a6b;
+  --input-bg: #1a2456;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== БАЗА ===== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: background 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== КНОПКА ТЕМЫ ===== */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.2s;
+}
+
+[data-theme="dark"] .theme-toggle::after {
+  transform: translateX(20px);
+}
+
+/* ===== КАРТОЧКА ===== */
+.card {
+  background: var(--panel);
+  border-radius: 24px;
+  padding: 36px 28px 32px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.logo {
+  display: block;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 14px;
+  object-fit: contain;
+}
+
+.title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 26px;
+}
+
+/* ===== ЭКРАНЫ ===== */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ===== СООБЩЕНИЯ ===== */
+.error, .success {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: none;
+  font-weight: 500;
+}
+.error {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+.success {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+.error.show, .success.show { display: block; }
+
+/* ===== ПОЛЕ ТЕЛЕФОНА ===== */
+.phone-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.country-select {
+  height: 50px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.country-select:focus { border-color: var(--accent); }
+
+.phone-input, .text-input {
+  flex: 1;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.phone-input::placeholder,
+.text-input::placeholder {
+  color: var(--text-2);
+  opacity: 0.6;
+}
+
+.phone-input:focus, .text-input:focus {
+  border-color: var(--accent);
+}
+
+/* ===== OTP ===== */
+.otp-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.otp-input {
+  width: 52px;
+  height: 62px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.otp-input:focus { border-color: var(--accent); }
+
+/* ===== АВАТАР ===== */
+.avatar-upload {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px dashed var(--accent);
+  background: var(--input-bg);
+  margin: 0 auto 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.avatar-upload:hover { background: rgba(30, 58, 138, 0.05); }
+
+.avatar-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-upload .plus {
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.avatar-upload .avatar-label {
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ===== ПОЛЯ ===== */
+.field {
+  margin-bottom: 12px;
+}
+
+.hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 18px;
+}
+
+/* ===== КНОПКА ===== */
+.btn {
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+.btn:hover:not(:disabled) { background: var(--accent-hover); }
+.btn:active:not(:disabled) { transform: scale(0.98); }
+.btn:disabled { opacity: 0.5; cursor: wait; }
+
+/* ===== ССЫЛКИ ===== */
+.link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.link a {
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.link a:hover { opacity: 0.7; }
+
+/* ===== УТИЛИТЫ ===== */
+.hidden { display: none !important; }
+
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 420px) {
+  .card {
+    padding: 28px 20px 24px;
+    border-radius: 20px;
+  }
+  .otp-input {
+    width: 46px;
+    height: 56px;
+    font-size: 22px;
+  }
+  .title { font-size: 24px; }
+  .logo { width: 72px; height: 72px; }
+}
