@@ -1,24 +1,53 @@
 // ============================================================
 //  MINDOFI — Основная логика приложения
-//  Часть 1: инициализация, пользователи, чаты, сообщения
 // ============================================================
 
 // ===== СОСТОЯНИЕ =====
 let currentUser = null;
 let currentToken = null;
-let activeChat = null;       // текущий открытый чат (phone или group_id)
-let users = {};              // кэш пользователей
-let messages = {};           // кэш сообщений по chatId
+let activeChat = null;
+let users = {};
+let messages = {};
 let currentTab = 'all';
 let searchFilter = '';
-let socket = null;           // WebSocket (опционально, для real-time)
 let pollingTimer = null;
+let newAvatarBase64 = null;
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
+// ===== ЗВОНКИ =====
+let pc = null;
+let localStream = null;
+let remoteStream = null;
+let callType = 'audio';
+let callRole = 'caller';
+let callTarget = null;
+let callId = null;
+let callSec = 0;
+let callTimerInterval = null;
+let callPollInterval = null;
+let incomingCallId = null;
+let incomingCallData = null;
+let muteOn = false;
+let camOff = false;
+let watchInterval = null;
+let ringtoneCtx = null;
+
+// STUN/TURN
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:openrelay.metered.ca:80' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
+
+// ============================================================
+//  ИНИЦИАЛИЗАЦИЯ
+// ============================================================
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  // Проверяем авторизацию
   currentToken = localStorage.getItem('mindofi_token');
   const userJson = localStorage.getItem('mindofi_user');
 
@@ -34,26 +63,49 @@ async function init() {
     return;
   }
 
-  // Тема
+  // Восстанавливаем свежие данные о пользователе
+  await refreshMe();
+
   applyTheme();
-
-  // Показываем мой профиль
   renderMe();
-
-  // Загружаем данные
   await loadUsers();
   renderChatList();
-
-  // Запускаем polling (каждые 3 секунды)
   startPolling();
+  startCallWatcher();
 
-  // Обновление статуса при закрытии
   window.addEventListener('beforeunload', () => {
     updatePresence(false);
   });
 
-  // Проверка входящих звонков
-  startCallWatcher();
+  // Авторасширение textarea
+  const ta = document.getElementById('messageInput');
+  if (ta) {
+    ta.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+    ta.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  }
+
+  // Закрытие модалок по клику вне
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) m.style.display = 'none';
+    });
+  });
+}
+
+async function refreshMe() {
+  const u = await apiRequest('users/' + currentUser.phone);
+  if (u && u.name) {
+    currentUser = Object.assign({}, currentUser, u);
+    localStorage.setItem('mindofi_user', JSON.stringify(currentUser));
+  }
 }
 
 // ============================================================
@@ -134,14 +186,11 @@ function renderMe() {
 //  ПОЛЬЗОВАТЕЛИ
 // ============================================================
 async function loadUsers() {
-  // Загружаем список чатов (по сообщениям)
   const chats = await apiRequest('messages');
   if (!chats) return;
 
-  // Для каждого chatId вытаскиваем собеседника
   const promises = [];
   for (const chatId in chats) {
-    // chatId формата: phone1_phone2 (отсортированные)
     const parts = chatId.split('_');
     if (parts.length !== 2) continue;
 
@@ -166,7 +215,6 @@ function renderChatList() {
   const list = document.getElementById('chatList');
   list.innerHTML = '';
 
-  // Собираем все уникальные чаты
   const chatItems = [];
 
   for (const phone in users) {
@@ -177,22 +225,15 @@ function renderChatList() {
     const msgs = messages[chatId] || [];
     const lastMsg = msgs[msgs.length - 1];
 
-    chatItems.push({
-      phone,
-      user: u,
-      lastMsg,
-      chatId
-    });
+    chatItems.push({ phone, user: u, lastMsg, chatId });
   }
 
-  // Сортировка: сначала те, где есть последнее сообщение
   chatItems.sort((a, b) => {
     const tA = a.lastMsg ? a.lastMsg.timestamp : 0;
     const tB = b.lastMsg ? b.lastMsg.timestamp : 0;
     return tB - tA;
   });
 
-  // Фильтр
   let filtered = chatItems;
   if (searchFilter) {
     const q = searchFilter.toLowerCase();
@@ -218,8 +259,8 @@ function renderChatList() {
     el.onclick = () => openChat(item.phone);
 
     const avatarHTML = item.user.photoURL
-      ? '<div class="chat-item-avatar"><img src="' + item.user.photoURL + '" alt=""></div>'
-      : '<div class="chat-item-avatar" style="background:var(--accent)">' +
+      ? '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '"><img src="' + item.user.photoURL + '" alt=""></div>'
+      : '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '" style="background:var(--accent)">' +
         (item.user.name || '?')[0].toUpperCase() + '</div>';
 
     let preview = 'Нет сообщений';
@@ -249,11 +290,9 @@ async function openChat(phone) {
   const u = users[phone];
   if (!u) return;
 
-  // Скрываем пустое состояние
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('chatArea').style.display = 'flex';
 
-  // Заполняем шапку
   const chatAvatar = document.getElementById('chatAvatar');
   if (u.photoURL) {
     chatAvatar.innerHTML = '<img src="' + u.photoURL + '" alt="">';
@@ -264,13 +303,9 @@ async function openChat(phone) {
   document.getElementById('chatName').textContent = u.name || phone;
   document.getElementById('chatStatus').textContent = u.online ? 'В сети' : 'Не в сети';
 
-  // Перерисовываем список (активный чат)
   renderChatList();
-
-  // Загружаем сообщения
   await loadMessages(phone);
 
-  // Мобильная версия — закрываем сайдбар
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
   }
@@ -340,7 +375,6 @@ function renderMessages(phone) {
     container.appendChild(el);
   });
 
-  // Скролл вниз
   container.scrollTop = container.scrollHeight;
 }
 
@@ -364,7 +398,6 @@ async function sendMessage() {
     type: 'text'
   };
 
-  // Оптимистично добавляем в UI
   if (!messages[chatId]) messages[chatId] = [];
   messages[chatId].push(msg);
   renderMessages(activeChat);
@@ -372,11 +405,8 @@ async function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
 
-  // Отправляем на сервер
   const res = await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
-  if (!res) {
-    toast('Не удалось отправить');
-  }
+  if (!res) toast('Не удалось отправить');
 }
 
 // ============================================================
@@ -386,7 +416,6 @@ async function onFilePick(input) {
   const file = input.files[0];
   if (!file || !activeChat) return;
 
-  // Лимит 50 МБ
   if (file.size > CONFIG.MAX_FILE_SIZE) {
     toast('Файл слишком большой (макс ' + Math.round(CONFIG.MAX_FILE_SIZE / 1024 / 1024) + ' МБ)');
     input.value = '';
@@ -446,12 +475,10 @@ function closeModal(id) {
   document.getElementById(id).style.display = 'none';
 }
 
-// Закрытие по клику вне
-document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', (e) => {
-    if (e.target === m) m.style.display = 'none';
-  });
-});
+function openNewChat() {
+  openModal('newChatModal');
+  setTimeout(() => document.getElementById('userSearchInput').focus(), 100);
+}
 
 // ============================================================
 //  ПОИСК ПОЛЬЗОВАТЕЛЕЙ
@@ -465,27 +492,48 @@ async function searchUsers(query) {
 
   results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Поиск...</div>';
 
-  // Ищем по @username
   const username = query.replace(/^@/, '');
   const phone = await apiRequest('usernames/' + username);
 
   if (!phone) {
-    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
+    // Ищем в локальном кэше
+    const found = Object.entries(users).filter(([p, u]) =>
+      (u.username || '').toLowerCase().includes(username.toLowerCase()) ||
+      (u.name || '').toLowerCase().includes(username.toLowerCase())
+    );
+
+    if (!found.length) {
+      results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
+      return;
+    }
+
+    results.innerHTML = '';
+    found.forEach(([p, u]) => renderSearchResult(p, u, results));
+    return;
+  }
+
+  if (phone === currentUser.phone) {
+    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Это вы</div>';
     return;
   }
 
   const u = await apiRequest('users/' + phone);
-  if (!u || phone === currentUser.phone) {
+  if (!u || !u.name) {
     results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
     return;
   }
 
   users[phone] = u;
+  results.innerHTML = '';
+  renderSearchResult(phone, u, results);
+}
 
+function renderSearchResult(phone, u, container) {
   const el = document.createElement('div');
   el.className = 'search-result';
   el.onclick = () => {
     closeModal('newChatModal');
+    if (!users[phone]) users[phone] = u;
     openChat(phone);
   };
 
@@ -496,11 +544,10 @@ async function searchUsers(query) {
   el.innerHTML = avatarHTML +
     '<div class="chat-item-body">' +
       '<div class="chat-item-name">' + escapeHtml(u.name) + '</div>' +
-      '<div class="chat-item-preview">' + (u.username || phone) + '</div>' +
+      '<div class="chat-item-preview">' + (u.username || '+' + phone) + '</div>' +
     '</div>';
 
-  results.innerHTML = '';
-  results.appendChild(el);
+  container.appendChild(el);
 }
 
 // ============================================================
@@ -520,27 +567,165 @@ function switchTab(tab) {
 }
 
 // ============================================================
-//  POLLING (обновление каждые 3 сек)
+//  НАСТРОЙКИ ПРОФИЛЯ
+// ============================================================
+function openSettingsModal() {
+  if (!currentUser) return;
+
+  const av = document.getElementById('settingsAvatar');
+  if (currentUser.photoURL) {
+    av.innerHTML = '<img src="' + currentUser.photoURL + '"><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+  } else {
+    av.innerHTML = '<span>' + (currentUser.name || '?')[0].toUpperCase() + '</span><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+  }
+  newAvatarBase64 = null;
+
+  document.getElementById('settingsName').value = currentUser.name || '';
+  document.getElementById('settingsUsername').value = (currentUser.username || '').replace(/^@/, '');
+  document.getElementById('settingsBio').value = currentUser.bio || '';
+  document.getElementById('settingsBirthday').value = currentUser.birthday || '';
+  document.getElementById('bioCounter').textContent = (currentUser.bio || '').length;
+
+  document.getElementById('settingsCurrentPwd').value = '';
+  document.getElementById('settingsNewPwd').value = '';
+  document.getElementById('settingsRepeatPwd').value = '';
+
+  const bioEl = document.getElementById('settingsBio');
+  bioEl.oninput = () => {
+    document.getElementById('bioCounter').textContent = bioEl.value.length;
+  };
+
+  openModal('settingsModal');
+}
+
+function onSettingsAvatarPick(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    toast('Аватар должен быть до 2 МБ');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    newAvatarBase64 = e.target.result.split(',')[1];
+    const av = document.getElementById('settingsAvatar');
+    av.innerHTML = '<img src="' + e.target.result + '"><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function saveProfile() {
+  const name = document.getElementById('settingsName').value.trim();
+  const username = document.getElementById('settingsUsername').value.trim().replace(/^@/, '').replace(/[^\w]/g, '');
+  const bio = document.getElementById('settingsBio').value.trim();
+  const birthday = document.getElementById('settingsBirthday').value;
+
+  if (!name) {
+    toast('Имя не может быть пустым');
+    return;
+  }
+
+  if (birthday) {
+    const bd = new Date(birthday);
+    const now = new Date();
+    const age = (now - bd) / (1000 * 60 * 60 * 24 * 365.25);
+    if (age < 13) {
+      toast('Возраст должен быть не менее 13 лет');
+      return;
+    }
+    if (age > 120) {
+      toast('Неверная дата рождения');
+      return;
+    }
+  }
+
+  let newPhotoUrl = currentUser.photoURL;
+  if (newAvatarBase64) {
+    const up = await apiRequest('upload', 'POST', {
+      image: newAvatarBase64,
+      type: 'image'
+    });
+    if (up && up.url) {
+      newPhotoUrl = up.url;
+    } else {
+      toast('Не удалось загрузить аватар');
+      return;
+    }
+  }
+
+  const patch = {
+    name: name,
+    username: username ? '@' + username : null,
+    bio: bio,
+    birthday: birthday || null,
+    photo_url: newPhotoUrl
+  };
+
+  const res = await apiRequest('users/' + currentUser.phone, 'PATCH', patch);
+  if (!res) {
+    toast('Ошибка сохранения');
+    return;
+  }
+
+  currentUser.name = name;
+  currentUser.username = username ? '@' + username : null;
+  currentUser.bio = bio;
+  currentUser.birthday = birthday || null;
+  currentUser.photoURL = newPhotoUrl;
+  localStorage.setItem('mindofi_user', JSON.stringify(currentUser));
+
+  renderMe();
+  toast('Профиль сохранён ✅');
+  closeModal('settingsModal');
+}
+
+async function changePassword() {
+  const cur = document.getElementById('settingsCurrentPwd').value;
+  const nw = document.getElementById('settingsNewPwd').value;
+  const rep = document.getElementById('settingsRepeatPwd').value;
+
+  if (nw.length < 6) {
+    toast('Новый пароль минимум 6 символов');
+    return;
+  }
+  if (nw !== rep) {
+    toast('Пароли не совпадают');
+    return;
+  }
+
+  const res = await apiRequest('auth/set-password', 'POST', {
+    current: cur,
+    new: nw
+  });
+
+  if (!res || !res.success) {
+    toast(res && res.error ? res.error : 'Ошибка');
+    return;
+  }
+
+  document.getElementById('settingsCurrentPwd').value = '';
+  document.getElementById('settingsNewPwd').value = '';
+  document.getElementById('settingsRepeatPwd').value = '';
+  toast('Пароль установлен ✅');
+}
+
+// ============================================================
+//  POLLING
 // ============================================================
 function startPolling() {
   clearInterval(pollingTimer);
   pollingTimer = setInterval(async () => {
-    // Обновляем presence
     updatePresence(true);
-
-    // Обновляем список пользователей
     await loadUsers();
-
-    // Обновляем сообщения активного чата
     if (activeChat) {
       await loadMessages(activeChat);
     }
-
-    // Перерисовываем список
     renderChatList();
   }, 3000);
 
-  // Первый вызов
   updatePresence(true);
 }
 
@@ -556,9 +741,7 @@ async function updatePresence(online) {
 //  ВЫХОД
 // ============================================================
 async function logout() {
-  if (currentUser) {
-    await updatePresence(false);
-  }
+  if (currentUser) await updatePresence(false);
   localStorage.removeItem('mindofi_token');
   localStorage.removeItem('mindofi_user');
   localStorage.removeItem('mindofi_phone');
@@ -614,101 +797,31 @@ function openProfile() {
   toast(u.name + (u.username ? ' · ' + u.username : '') + (u.phone ? ' · +' + u.phone : ''));
 }
 
-// Авторасширение textarea
-document.addEventListener('DOMContentLoaded', () => {
-  const ta = document.getElementById('messageInput');
-  if (ta) {
-    ta.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-    });
-    ta.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-  }
-});
-
-// ============================================================
-//  ЗВОНКИ (заглушки — часть 2)
-// ============================================================
 // ============================================================
 //  ЗВОНКИ (WebRTC)
 // ============================================================
-let pc = null;                    // RTCPeerConnection
-let localStream = null;           // мой поток
-let remoteStream = null;          // чужой поток
-let callType = 'audio';           // 'audio' | 'video'
-let callRole = 'caller';          // 'caller' | 'callee'
-let callTarget = null;            // phone собеседника
-let callId = null;                // ID звонка
-let callSec = 0;                  // длительность
-let callTimerInterval = null;     // таймер
-let callPollInterval = null;      // polling для ответа
-let incomingCallId = null;        // ID входящего
-let incomingCallData = null;      // данные входящего
-let muteOn = false;
-let camOff = false;
-let watchInterval = null;         // watcher для входящих
-
-// ===== STUN-серверы =====
-const ICE_CONFIG = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:openrelay.metered.ca:80' },
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    }
-  ]
-};
-
-// ============================================================
-//  ИНИЦИИРОВАТЬ ЗВОНОК (я звоню)
-// ============================================================
 async function initCall(type) {
-  if (!activeChat) {
-    toast('Выберите чат');
-    return;
-  }
-  if (pc) {
-    toast('Уже идёт звонок');
-    return;
-  }
+  if (!activeChat) { toast('Выберите чат'); return; }
+  if (pc) { toast('Уже идёт звонок'); return; }
 
   callType = type;
   callRole = 'caller';
   callTarget = activeChat;
   callId = [currentUser.phone, callTarget].sort().join('_') + '_call';
 
-  // Запрашиваем медиа
   try {
     const constraints = type === 'video'
       ? { audio: true, video: { facingMode: 'user', width: 640, height: 480 } }
       : { audio: true, video: false };
-
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
     toast('Нет доступа к ' + (type === 'video' ? 'камере' : 'микрофону'));
     return;
   }
 
-  // Создаём соединение
   pc = new RTCPeerConnection(ICE_CONFIG);
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
-  // Добавляем мои треки
-  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-  // Мой видео-превью, если видео
   const localVideo = document.getElementById('localVideo');
   if (type === 'video') {
     localVideo.srcObject = localStream;
@@ -717,7 +830,6 @@ async function initCall(type) {
     localVideo.style.display = 'none';
   }
 
-  // Получаем чужие треки
   const remoteVideo = document.getElementById('remoteVideo');
   pc.ontrack = (event) => {
     if (event.streams && event.streams[0]) {
@@ -727,7 +839,6 @@ async function initCall(type) {
     }
   };
 
-  // Отправляем ICE-кандидатов на сервер
   pc.onicecandidate = (event) => {
     if (event.candidate) {
       apiRequest('ice/' + callId, 'POST', {
@@ -737,11 +848,9 @@ async function initCall(type) {
     }
   };
 
-  // Создаём offer
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  // Отправляем на сервер
   await apiRequest('calls/' + callId, 'POST', {
     caller: currentUser.phone,
     callee: callTarget,
@@ -751,10 +860,8 @@ async function initCall(type) {
     ts: Date.now()
   });
 
-  // Показываем экран звонка
   showCallScreen(type, 'caller', users[callTarget]);
 
-  // Polling — ждём ответа или отклонения (макс 40 секунд)
   let tries = 0;
   callPollInterval = setInterval(async () => {
     tries++;
@@ -775,35 +882,26 @@ async function initCall(type) {
       return;
     }
 
-    // Получили ответ — устанавливаем соединение
     if (callData.answer && pc && pc.signalingState === 'have-local-offer') {
       clearInterval(callPollInterval);
       try {
         await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(callData.answer)));
 
-        // Подгружаем ICE-кандидатов собеседника
         const cands = await apiRequest('ice/' + callId);
         if (cands) {
           for (const cid in cands) {
-            try {
-              await pc.addIceCandidate(new RTCIceCandidate(cands[cid]));
-            } catch (e) {}
+            try { await pc.addIceCandidate(new RTCIceCandidate(cands[cid])); } catch (e) {}
           }
         }
 
         startCallTimer();
         document.getElementById('callStatus').style.display = 'none';
         document.getElementById('callTimer').style.display = 'block';
-      } catch (e) {
-        console.error('setRemoteDescription error:', e);
-      }
+      } catch (e) { console.error(e); }
     }
   }, 1000);
 }
 
-// ============================================================
-//  ОТВЕТИТЬ НА ВХОДЯЩИЙ
-// ============================================================
 async function acceptCall() {
   document.getElementById('incomingCall').style.display = 'none';
   if (!incomingCallId || !incomingCallData) return;
@@ -813,12 +911,10 @@ async function acceptCall() {
   callRole = 'callee';
   callTarget = incomingCallData.caller;
 
-  // Запрашиваем медиа
   try {
     const constraints = callType === 'video'
       ? { audio: true, video: { facingMode: 'user', width: 640, height: 480 } }
       : { audio: true, video: false };
-
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
     toast('Нет доступа к устройству');
@@ -828,7 +924,7 @@ async function acceptCall() {
   }
 
   pc = new RTCPeerConnection(ICE_CONFIG);
-  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
   const localVideo = document.getElementById('localVideo');
   if (callType === 'video') {
@@ -856,25 +952,19 @@ async function acceptCall() {
     }
   };
 
-  // Устанавливаем offer собеседника
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.offer)));
 
-    // Подгружаем ICE
     const cands = await apiRequest('ice/' + callId);
     if (cands) {
       for (const cid in cands) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(cands[cid]));
-        } catch (e) {}
+        try { await pc.addIceCandidate(new RTCIceCandidate(cands[cid])); } catch (e) {}
       }
     }
 
-    // Создаём answer
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    // Отправляем answer на сервер
     await apiRequest('calls/' + callId, 'PATCH', {
       answer: JSON.stringify(answer),
       status: 'connected'
@@ -885,24 +975,18 @@ async function acceptCall() {
     document.getElementById('callStatus').style.display = 'none';
     document.getElementById('callTimer').style.display = 'block';
 
-    // Продолжаем принимать ICE от собеседника
     const icePoll = setInterval(async () => {
-      if (!pc) {
-        clearInterval(icePoll);
-        return;
-      }
+      if (!pc) { clearInterval(icePoll); return; }
       const c = await apiRequest('ice/' + callId);
       if (c) {
         for (const cid in c) {
-          try {
-            await pc.addIceCandidate(new RTCIceCandidate(c[cid]));
-          } catch (e) {}
+          try { await pc.addIceCandidate(new RTCIceCandidate(c[cid])); } catch (e) {}
         }
       }
     }, 1500);
 
   } catch (e) {
-    console.error('acceptCall error:', e);
+    console.error(e);
     toast('Ошибка соединения');
     hangUp();
   }
@@ -911,9 +995,6 @@ async function acceptCall() {
   incomingCallData = null;
 }
 
-// ============================================================
-//  ОТКЛОНИТЬ ВХОДЯЩИЙ
-// ============================================================
 async function declineCall() {
   document.getElementById('incomingCall').style.display = 'none';
   if (incomingCallId) {
@@ -923,39 +1004,22 @@ async function declineCall() {
   incomingCallData = null;
 }
 
-// ============================================================
-//  ЗАВЕРШИТЬ ЗВОНОК
-// ============================================================
 async function hangUp() {
   clearInterval(callTimerInterval);
   clearInterval(callPollInterval);
   callTimerInterval = null;
   callPollInterval = null;
 
-  // Закрываем соединение
-  if (pc) {
-    try { pc.close(); } catch (e) {}
-    pc = null;
-  }
+  if (pc) { try { pc.close(); } catch (e) {} pc = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
 
-  // Останавливаем треки
-  if (localStream) {
-    localStream.getTracks().forEach(t => t.stop());
-    localStream = null;
-  }
-
-  // Очищаем видео
   const rv = document.getElementById('remoteVideo');
   const lv = document.getElementById('localVideo');
-  if (rv) { rv.srcObject = null; }
+  if (rv) rv.srcObject = null;
   if (lv) { lv.srcObject = null; lv.style.display = 'none'; }
 
-  // Удаляем звонок с сервера
-  if (callId) {
-    await apiRequest('calls/' + callId, 'DELETE');
-  }
+  if (callId) await apiRequest('calls/' + callId, 'DELETE');
 
-  // Прячем экран звонка
   document.getElementById('callScreen').style.display = 'none';
   document.getElementById('incomingCall').style.display = 'none';
 
@@ -971,15 +1035,12 @@ function resetCall() {
   callSec = 0;
   muteOn = false;
   camOff = false;
-  const muteBtn = document.getElementById('muteBtn');
-  const camBtn = document.getElementById('camBtn');
-  if (muteBtn) muteBtn.classList.remove('muted');
-  if (camBtn) camBtn.classList.remove('muted');
+  const mb = document.getElementById('muteBtn');
+  const cb = document.getElementById('camBtn');
+  if (mb) mb.classList.remove('muted');
+  if (cb) cb.classList.remove('muted');
 }
 
-// ============================================================
-//  ЭКРАН ЗВОНКА
-// ============================================================
 function showCallScreen(type, role, user) {
   document.getElementById('callScreen').style.display = 'flex';
 
@@ -1012,32 +1073,22 @@ function startCallTimer() {
   }, 1000);
 }
 
-// ============================================================
-//  УПРАВЛЕНИЕ
-// ============================================================
 function toggleMute() {
   muteOn = !muteOn;
-  if (localStream) {
-    localStream.getAudioTracks().forEach(t => t.enabled = !muteOn);
-  }
+  if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = !muteOn);
   document.getElementById('muteBtn').classList.toggle('muted', muteOn);
 }
 
 function toggleCam() {
   camOff = !camOff;
-  if (localStream) {
-    localStream.getVideoTracks().forEach(t => t.enabled = !camOff);
-  }
+  if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = !camOff);
   document.getElementById('camBtn').classList.toggle('muted', camOff);
 }
 
-// ============================================================
-//  WATCHER — проверка входящих звонков
-// ============================================================
 function startCallWatcher() {
   clearInterval(watchInterval);
   watchInterval = setInterval(async () => {
-    if (pc || !currentUser) return;  // уже в звонке
+    if (pc || !currentUser) return;
     if (document.getElementById('incomingCall').style.display === 'flex') return;
 
     const calls = await apiRequest('calls');
@@ -1049,7 +1100,6 @@ function startCallWatcher() {
       if (c.status !== 'calling') continue;
       if (Date.now() - Number(c.ts) > 60000) continue;
 
-      // Показываем входящий
       incomingCallId = id;
       incomingCallData = c;
       showIncoming(c);
@@ -1074,22 +1124,11 @@ function showIncoming(callData) {
   type.textContent = callData.call_type === 'video' ? '📹 Видеозвонок' : '📞 Аудиозвонок';
 
   document.getElementById('incomingCall').style.display = 'flex';
-
-  // Звук — простой вибратор
-  try {
-    playRingtone();
-  } catch (e) {}
+  try { playRingtone(); } catch (e) {}
 }
 
-// ============================================================
-//  ЗВУК ВХОДЯЩЕГО ЗВОНКА
-// ============================================================
-let ringtoneCtx = null;
-
 function playRingtone() {
-  if (!ringtoneCtx) {
-    ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!ringtoneCtx) ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
   const ctx = ringtoneCtx;
   let count = 0;
 
