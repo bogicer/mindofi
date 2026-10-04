@@ -1,5 +1,5 @@
 // ============================================================
-//  MINDOFI — Логика страницы логина (index.html)
+//  MINDOFI — Логика страницы логина/регистрации
 // ============================================================
 
 let currentMode = 'login';   // 'login' | 'register'
@@ -29,7 +29,6 @@ applyTheme();
 //  ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
 // ============================================================
 function showScreen(name) {
-  // name: 'Phone' | 'Otp' | 'Name'
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen' + name);
   if (el) el.classList.add('active');
@@ -113,7 +112,6 @@ async function sendOtp() {
     return;
   }
 
-  // Пока бэк не подключил SMS — показываем код в интерфейсе и консоли
   otpCode = res.otp || '';
   document.getElementById('otpHint').textContent = 'Код отправлен на +' + otpPhone;
 
@@ -189,9 +187,8 @@ async function verifyOtp() {
     showSuccess('Вход выполнен!');
 
     setTimeout(() => {
-      // TODO: переход в app.html когда он будет готов
-      alert('Вход выполнен!\nПривет, ' + res.user.name);
-    }, 500);
+      window.location.href = 'app.html';
+    }, 600);
   } else {
     showError(res.error || 'Ошибка входа');
   }
@@ -254,9 +251,8 @@ async function doRegister() {
     showSuccess('Аккаунт создан!');
 
     setTimeout(() => {
-      // TODO: переход в app.html
-      alert('Аккаунт создан!\nДобро пожаловать, ' + res.user.name);
-    }, 500);
+      window.location.href = 'app.html';
+    }, 600);
   } else {
     showError(res.error || 'Ошибка регистрации');
   }
