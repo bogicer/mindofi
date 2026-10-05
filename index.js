@@ -4,8 +4,6 @@
 
 let currentMode = 'login';   // 'login' | 'register'
 let otpPhone = '';           // номер в формате 380XXXXXXXXX
-let otpCode = '';            // код, который вернул сервер (для теста)
-let otpToken = null;         // токен после успешного входа
 let avatarData = null;       // base64 аватарки
 
 // ============================================================
@@ -53,14 +51,14 @@ function showError(msg) {
   const el = document.getElementById('errBox');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 4000);
+  setTimeout(() => el.classList.remove('show'), 5000);
 }
 
 function showSuccess(msg) {
   const el = document.getElementById('okBox');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 4000);
+  setTimeout(() => el.classList.remove('show'), 5000);
 }
 
 // ============================================================
@@ -100,7 +98,7 @@ async function sendOtp() {
 
   const btn = document.getElementById('phoneBtn');
   btn.disabled = true;
-  btn.textContent = 'Отправка...';
+  btn.textContent = 'Отправка SMS...';
 
   const res = await apiPost('auth/otp', { phone: otpPhone });
 
@@ -108,20 +106,13 @@ async function sendOtp() {
   btn.textContent = 'Продолжить';
 
   if (!res.success) {
-    showError(res.error || 'Ошибка отправки кода');
+    showError(res.error || 'Ошибка отправки SMS');
     return;
   }
 
-  otpCode = res.otp || '';
+  // SMS отправлена через TurboSMS
   document.getElementById('otpHint').textContent = 'Код отправлен на +' + otpPhone;
-
-  if (otpCode) {
-    showSuccess('Тестовый код: ' + otpCode);
-    console.log(
-      '%cOTP: ' + otpCode,
-      'background:#1e3a8a;color:#fff;padding:8px 14px;border-radius:8px;font-size:18px;font-weight:bold;'
-    );
-  }
+  showSuccess('SMS отправлена на +' + otpPhone);
 
   showScreen('Otp');
   setTimeout(() => document.getElementById('o1').focus(), 100);
@@ -154,6 +145,7 @@ function getOtpValue() {
 
 // ============================================================
 //  ШАГ 2: ПРОВЕРКА OTP
+//  Код проверяет сервер! Локальной проверки больше нет.
 // ============================================================
 async function verifyOtp() {
   const code = getOtpValue();
@@ -163,21 +155,17 @@ async function verifyOtp() {
     return;
   }
 
-  // Локальная проверка (пока бэк не сверяет код сам)
-  if (otpCode && code !== otpCode) {
-    showError('Неверный код');
-    for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
-    document.getElementById('o1').focus();
-    return;
-  }
-
   if (currentMode === 'register') {
+    // На регистрацию — код проверит сервер в doRegister
     showScreen('Name');
     setTimeout(() => document.getElementById('nameInput').focus(), 100);
     return;
   }
 
   // ЛОГИН
+  const btn = event && event.target;
+  showSuccess('Проверка...');
+
   const res = await apiPost('auth/login', { phone: otpPhone, otp: code });
 
   if (res.success) {
@@ -191,6 +179,9 @@ async function verifyOtp() {
     }, 600);
   } else {
     showError(res.error || 'Ошибка входа');
+    // Очищаем поля OTP при неверном коде
+    for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
+    document.getElementById('o1').focus();
   }
 }
 
