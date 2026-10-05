@@ -60,6 +60,7 @@
 const CONTACT = {
   email: "med1asksmain@gmail.com",
   support: "@admin",
+  operator: "Koder Digital",
   address: {
     en: "Vynnyky, Lviv region, Lychakiv district, Ukraine",
     uk: "м. Винники, Львівська область, Личаківський район",
@@ -75,7 +76,7 @@ const T = {
     title: "MINDOFI Privacy Policy",
     date: "Last updated: October 5, 2026",
     sections: [
-      { h: "1. Introduction", b: `<p>This Privacy Policy explains what data the MINDOFI messenger (the "Service") collects, how it is used, stored, and protected.</p><p>By using the Service, you agree to this Policy. If you do not agree, please do not use the Service.</p><p><strong>Service Operator:</strong> MINDOFI</p><p><strong>Contact email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p>` },
+      { h: "1. Introduction", b: `<p>This Privacy Policy explains what data the MINDOFI messenger (the "Service") collects, how it is used, stored, and protected.</p><p>By using the Service, you agree to this Policy. If you do not agree, please do not use the Service.</p><p><strong>Service Operator:</strong> ${CONTACT.operator}</p><p><strong>Contact email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p>` },
       { h: "2. Data We Collect", b: `<p><strong>2.1. You provide:</strong></p><ul><li>Phone number (registration/login)</li><li>Name, username, avatar, bio, birthday (optional)</li></ul><p><strong>2.2. Automatic:</strong></p><ul><li>IP address, User-Agent, timestamps</li><li>Geolocation (only with your consent, for radius protection)</li></ul><p><strong>2.3. Messages:</strong></p><ul><li>Text — stored on server in plain text</li><li>Files, voice, images — stored on server</li><li>Metadata — sender, recipient, time</li></ul>` },
       { h: "3. Important Notice on Encryption", b: `<div class="warning"><strong>MINDOFI does NOT use end-to-end encryption (E2E).</strong> The Administration has the technical ability to access message content for moderation, support, and legal compliance. <strong>Do not send passwords, banking details, or sensitive documents.</strong></div>` },
       { h: "4. How We Use Data", b: `<ul><li>To provide messaging and calling features</li><li>For authentication and account security</li><li>To prevent spam, fraud, and abuse</li><li>To improve the Service and fix bugs</li><li>To comply with legal requirements</li></ul>` },
@@ -85,16 +86,16 @@ const T = {
       { h: "8. Children", b: `<p>The Service is not intended for persons under <strong>13 years old</strong>. Accounts of underage users will be deleted.</p>` },
       { h: "9. Cookies", b: `<p>We use only technical cookies and localStorage for session and theme settings. No advertising or third-party analytics.</p>` },
       { h: "10. Changes", b: `<p>We may update this Policy. Significant changes will be announced in the app.</p>` },
-      { h: "11. Contact", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p><p><strong>Address:</strong> ${CONTACT.address.en}</p>` }
+      { h: "11. Contact", b: `<p><strong>Operator:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p><p><strong>Address:</strong> ${CONTACT.address.en}</p>` }
     ],
-    footer: "© 2026 MINDOFI. All rights reserved."
+    footer: "© 2026 MINDOFI by Koder Digital. All rights reserved."
   },
   uk: {
     back: "← Назад у додаток",
     title: "Політика конфіденційності MINDOFI",
     date: "Останнє оновлення: 5 жовтня 2026 р.",
     sections: [
-      { h: "1. Загальні положення", b: `<p>Ця Політика конфіденційності описує, які дані збирає месенджер MINDOFI (далі — «Сервіс»), як вони використовуються, зберігаються та захищаються.</p><p>Використовуючи Сервіс, ви погоджуєтесь з цією Політикою. Якщо не згодні — не використовуйте Сервіс.</p><p><strong>Оператор:</strong> MINDOFI</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p>` },
+      { h: "1. Загальні положення", b: `<p>Ця Політика конфіденційності описує, які дані збирає месенджер MINDOFI (далі — «Сервіс»), як вони використовуються, зберігаються та захищаються.</p><p>Використовуючи Сервіс, ви погоджуєтесь з цією Політикою. Якщо не згодні — не використовуйте Сервіс.</p><p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p>` },
       { h: "2. Які дані ми збираємо", b: `<p><strong>2.1. Ви надаєте:</strong></p><ul><li>Номер телефону (реєстрація/вхід)</li><li>Ім'я, username, аватар, біо, дата народження (за бажанням)</li></ul><p><strong>2.2. Автоматично:</strong></p><ul><li>IP-адреса, User-Agent, час дій</li><li>Геолокація (лише за вашою згодою, для захисту по радіусу)</li></ul><p><strong>2.3. Повідомлення:</strong></p><ul><li>Текстові — зберігаються на сервері у відкритому вигляді</li><li>Файли, голосові, зображення — на сервері</li><li>Метадані — відправник, отримувач, час</li></ul>` },
       { h: "3. Важливо про шифрування", b: `<div class="warning"><strong>MINDOFI НЕ використовує наскрізне шифрування (E2E).</strong> Адміністрація має технічну можливість доступу до вмісту повідомлень для модерації, підтримки та виконання вимог закону. <strong>Не надсилайте паролі, банківські дані та конфіденційні документи.</strong></div>` },
       { h: "4. Як ми використовуємо дані", b: `<ul><li>Для обміну повідомленнями та дзвінками</li><li>Для автентифікації та захисту акаунта</li><li>Для запобігання спаму й шахрайству</li><li>Для покращення Сервісу</li><li>Для виконання вимог закону</li></ul>` },
@@ -104,16 +105,16 @@ const T = {
       { h: "8. Діти", b: `<p>Сервіс не призначений для осіб молодше <strong>13 років</strong>. Акаунти неповнолітніх будуть видалені.</p>` },
       { h: "9. Cookies", b: `<p>Використовуємо лише технічні cookies та localStorage для сесії й теми. Без реклами та сторонньої аналітики.</p>` },
       { h: "10. Зміни", b: `<p>Ми можемо оновлювати Політику. Про суттєві зміни повідомимо у додатку.</p>` },
-      { h: "11. Контакти", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p><p><strong>Адреса:</strong> ${CONTACT.address.uk}</p>` }
+      { h: "11. Контакти", b: `<p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p><p><strong>Адреса:</strong> ${CONTACT.address.uk}</p>` }
     ],
-    footer: "© 2026 MINDOFI. Усі права захищені."
+    footer: "© 2026 MINDOFI від Koder Digital. Усі права захищені."
   },
   ru: {
     back: "← Назад в приложение",
     title: "Политика конфиденциальности MINDOFI",
     date: "Дата последнего обновления: 5 октября 2026 г.",
     sections: [
-      { h: "1. Общие положения", b: `<p>Настоящая Политика конфиденциальности описывает, какие данные собирает мессенджер MINDOFI (далее — «Сервис»), как они используются, хранятся и защищаются.</p><p>Используя Сервис, вы соглашаетесь с настоящей Политикой. Если не согласны — не используйте Сервис.</p><p><strong>Оператор:</strong> MINDOFI</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p>` },
+      { h: "1. Общие положения", b: `<p>Настоящая Политика конфиденциальности описывает, какие данные собирает мессенджер MINDOFI (далее — «Сервис»), как они используются, хранятся и защищаются.</p><p>Используя Сервис, вы соглашаетесь с настоящей Политикой. Если не согласны — не используйте Сервис.</p><p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p>` },
       { h: "2. Какие данные мы собираем", b: `<p><strong>2.1. Вы предоставляете:</strong></p><ul><li>Номер телефона (регистрация/вход)</li><li>Имя, username, аватар, био, дата рождения (по желанию)</li></ul><p><strong>2.2. Автоматически:</strong></p><ul><li>IP-адрес, User-Agent, время действий</li><li>Геолокация (только с вашего согласия, для защиты по радиусу)</li></ul><p><strong>2.3. Сообщения:</strong></p><ul><li>Текстовые — хранятся на сервере в открытом виде</li><li>Файлы, голосовые, изображения — на сервере</li><li>Метаданные — отправитель, получатель, время</li></ul>` },
       { h: "3. Важно о шифровании", b: `<div class="warning"><strong>MINDOFI НЕ использует сквозное шифрование (E2E).</strong> Администрация имеет техническую возможность доступа к содержимому сообщений для модерации, поддержки и выполнения требований законодательства. <strong>Не отправляйте пароли, банковские данные и конфиденциальные документы.</strong></div>` },
       { h: "4. Как мы используем данные", b: `<ul><li>Для обмена сообщениями и звонками</li><li>Для аутентификации и защиты аккаунта</li><li>Для предотвращения спама и мошенничества</li><li>Для улучшения Сервиса</li><li>Для соблюдения требований закона</li></ul>` },
@@ -123,16 +124,16 @@ const T = {
       { h: "8. Дети", b: `<p>Сервис не предназначен для лиц младше <strong>13 лет</strong>. Аккаунты несовершеннолетних будут удалены.</p>` },
       { h: "9. Cookies", b: `<p>Используем только технические cookies и localStorage для сессии и темы. Без рекламы и сторонней аналитики.</p>` },
       { h: "10. Изменения", b: `<p>Мы можем обновлять Политику. О существенных изменениях уведомим в приложении.</p>` },
-      { h: "11. Контакты", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p><p><strong>Адрес:</strong> ${CONTACT.address.ru}</p>` }
+      { h: "11. Контакты", b: `<p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p><p><strong>Адрес:</strong> ${CONTACT.address.ru}</p>` }
     ],
-    footer: "© 2026 MINDOFI. Все права защищены."
+    footer: "© 2026 MINDOFI от Koder Digital. Все права защищены."
   },
   de: {
     back: "← Zurück zur App",
     title: "MINDOFI Datenschutzerklärung",
     date: "Zuletzt aktualisiert: 5. Oktober 2026",
     sections: [
-      { h: "1. Allgemeines", b: `<p>Diese Datenschutzerklärung erläutert, welche Daten der MINDOFI-Messenger (der „Dienst") sammelt, wie sie verwendet, gespeichert und geschützt werden.</p><p>Durch die Nutzung des Dienstes stimmen Sie dieser Erklärung zu. Wenn Sie nicht zustimmen, nutzen Sie den Dienst bitte nicht.</p><p><strong>Betreiber:</strong> MINDOFI</p><p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p>` },
+      { h: "1. Allgemeines", b: `<p>Diese Datenschutzerklärung erläutert, welche Daten der MINDOFI-Messenger (der „Dienst") sammelt, wie sie verwendet, gespeichert und geschützt werden.</p><p>Durch die Nutzung des Dienstes stimmen Sie dieser Erklärung zu. Wenn Sie nicht zustimmen, nutzen Sie den Dienst bitte nicht.</p><p><strong>Betreiber:</strong> ${CONTACT.operator}</p><p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p>` },
       { h: "2. Welche Daten wir sammeln", b: `<p><strong>2.1. Von Ihnen bereitgestellt:</strong></p><ul><li>Telefonnummer (Registrierung/Login)</li><li>Name, Username, Avatar, Bio, Geburtsdatum (optional)</li></ul><p><strong>2.2. Automatisch:</strong></p><ul><li>IP-Adresse, User-Agent, Zeitstempel</li><li>Geolokation (nur mit Ihrer Zustimmung, für Radius-Schutz)</li></ul><p><strong>2.3. Nachrichten:</strong></p><ul><li>Text — auf dem Server im Klartext gespeichert</li><li>Dateien, Sprachnachrichten, Bilder — auf dem Server</li><li>Metadaten — Absender, Empfänger, Zeit</li></ul>` },
       { h: "3. Wichtig zur Verschlüsselung", b: `<div class="warning"><strong>MINDOFI verwendet KEINE Ende-zu-Ende-Verschlüsselung (E2E).</strong> Die Administration hat technischen Zugriff auf Nachrichteninhalte für Moderation, Support und gesetzliche Anforderungen. <strong>Senden Sie keine Passwörter, Bankdaten oder vertraulichen Dokumente.</strong></div>` },
       { h: "4. Wie wir Daten verwenden", b: `<ul><li>Für Nachrichten- und Anruffunktionen</li><li>Zur Authentifizierung und Kontosicherheit</li><li>Zur Verhinderung von Spam und Betrug</li><li>Zur Verbesserung des Dienstes</li><li>Zur Erfüllung gesetzlicher Anforderungen</li></ul>` },
@@ -142,16 +143,16 @@ const T = {
       { h: "8. Kinder", b: `<p>Der Dienst ist nicht für Personen unter <strong>13 Jahren</strong> bestimmt. Konten Minderjähriger werden gelöscht.</p>` },
       { h: "9. Cookies", b: `<p>Wir verwenden nur technische Cookies und localStorage für Sitzung und Theme. Keine Werbung oder Drittanbieter-Analyse.</p>` },
       { h: "10. Änderungen", b: `<p>Wir können diese Erklärung aktualisieren. Wesentliche Änderungen werden in der App angekündigt.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p><p><strong>Adresse:</strong> ${CONTACT.address.de}</p>` }
+      { h: "11. Kontakt", b: `<p><strong>Betreiber:</strong> ${CONTACT.operator}</p><p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p><p><strong>Adresse:</strong> ${CONTACT.address.de}</p>` }
     ],
-    footer: "© 2026 MINDOFI. Alle Rechte vorbehalten."
+    footer: "© 2026 MINDOFI von Koder Digital. Alle Rechte vorbehalten."
   },
   pl: {
     back: "← Powrót do aplikacji",
     title: "Polityka prywatności MINDOFI",
     date: "Ostatnia aktualizacja: 5 października 2026",
     sections: [
-      { h: "1. Postanowienia ogólne", b: `<p>Niniejsza Polityka prywatności opisuje, jakie dane zbiera komunikator MINDOFI (dalej — „Usługa"), jak są wykorzystywane, przechowywane i chronione.</p><p>Korzystając z Usługi, akceptujesz tę Politykę. Jeśli się nie zgadzasz — nie korzystaj z Usługi.</p><p><strong>Operator:</strong> MINDOFI</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p>` },
+      { h: "1. Postanowienia ogólne", b: `<p>Niniejsza Polityka prywatności opisuje, jakie dane zbiera komunikator MINDOFI (dalej — „Usługa"), jak są wykorzystywane, przechowywane i chronione.</p><p>Korzystając z Usługi, akceptujesz tę Politykę. Jeśli się nie zgadzasz — nie korzystaj z Usługi.</p><p><strong>Operator:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p>` },
       { h: "2. Jakie dane zbieramy", b: `<p><strong>2.1. Podajesz sam:</strong></p><ul><li>Numer telefonu (rejestracja/logowanie)</li><li>Imię, username, avatar, bio, data urodzenia (opcjonalnie)</li></ul><p><strong>2.2. Automatycznie:</strong></p><ul><li>Adres IP, User-Agent, znaczniki czasu</li><li>Geolokalizacja (tylko za Twoją zgodą, dla ochrony po promieniu)</li></ul><p><strong>2.3. Wiadomości:</strong></p><ul><li>Tekst — przechowywany na serwerze w postaci jawnej</li><li>Pliki, wiadomości głosowe, obrazy — na serwerze</li><li>Metadane — nadawca, odbiorca, czas</li></ul>` },
       { h: "3. Ważne o szyfrowaniu", b: `<div class="warning"><strong>MINDOFI NIE używa szyfrowania end-to-end (E2E).</strong> Administracja ma techniczną możliwość dostępu do treści wiadomości dla moderacji, wsparcia i wymogów prawnych. <strong>Nie wysyłaj haseł, danych bankowych ani poufnych dokumentów.</strong></div>` },
       { h: "4. Jak wykorzystujemy dane", b: `<ul><li>Do obsługi wiadomości i połączeń</li><li>Do uwierzytelniania i bezpieczeństwa konta</li><li>Do zapobiegania spamowi i oszustwom</li><li>Do ulepszania Usługi</li><li>Do zgodności z wymogami prawa</li></ul>` },
@@ -161,9 +162,9 @@ const T = {
       { h: "8. Dzieci", b: `<p>Usługa nie jest przeznaczona dla osób poniżej <strong>13 lat</strong>. Konta nieletnich zostaną usunięte.</p>` },
       { h: "9. Cookies", b: `<p>Używamy tylko technicznych cookies i localStorage dla sesji i motywu. Bez reklam i analityki stron trzecich.</p>` },
       { h: "10. Zmiany", b: `<p>Możemy aktualizować Politykę. O istotnych zmianach poinformujemy w aplikacji.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p><p><strong>Adres:</strong> ${CONTACT.address.pl}</p>` }
+      { h: "11. Kontakt", b: `<p><strong>Operator:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p><p><strong>Adres:</strong> ${CONTACT.address.pl}</p>` }
     ],
-    footer: "© 2026 MINDOFI. Wszelkie prawa zastrzeżone."
+    footer: "© 2026 MINDOFI od Koder Digital. Wszelkie prawa zastrzeżone."
   }
 };
 
