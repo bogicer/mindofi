@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="app.css?v=3">
+  <link rel="stylesheet" href="app.css?v=5">
 </head>
 <body>
 
-<!-- ===== МОБИЛЬНЫЕ КНОПКИ (видны только на телефоне) ===== -->
 <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Меню">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
     <line x1="3" y1="6" x2="21" y2="6"/>
@@ -22,30 +21,16 @@
   <span id="mobileProfileAvatar">?</span>
 </button>
 
-<!-- ===== OVERLAY (затемнение) ===== -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div id="app" class="app">
 
-  <!-- ==================== САЙДБАР ==================== -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <img src="logo.png" alt="MINDOFI" class="sidebar-logo">
       <span class="sidebar-title">MINDOFI</span>
       <div class="sidebar-actions">
-        <button class="icon-btn" title="Новый чат" onclick="openNewChat()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
-        <button class="icon-btn mobile-close-btn" onclick="toggleSidebar()" aria-label="Закрыть">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-        <button class="icon-btn desktop-only" title="Тема" onclick="toggleTheme()">
+        <button class="icon-btn" title="Тема" onclick="toggleTheme()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"/>
             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
@@ -87,7 +72,6 @@
     </div>
   </aside>
 
-  <!-- ==================== ОСНОВНАЯ ОБЛАСТЬ ==================== -->
   <main class="main" id="mainArea">
 
     <div class="empty-state" id="emptyState">
@@ -125,6 +109,14 @@
 
       <div class="messages" id="messages"></div>
 
+      <!-- Индикатор записи -->
+      <div class="recording-bar" id="recordingBar" style="display:none">
+        <div class="rec-dot"></div>
+        <span>Запись</span>
+        <span class="rec-timer" id="recordingTimer">0:00</span>
+        <span class="rec-hint">Отпустите, чтобы отправить</span>
+      </div>
+
       <div class="input-bar">
         <button class="icon-btn" title="Прикрепить файл" onclick="document.getElementById('fileInput').click()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -133,7 +125,7 @@
         </button>
         <input type="file" id="fileInput" style="display:none" onchange="onFilePick(this)">
 
-        <button class="icon-btn voice-btn-mobile" title="Голосовое" id="voiceBtn">
+        <button class="icon-btn" title="Удерживайте для записи" id="voiceBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
             <path d="M19 10v2a7 7 0 01-14 0v-2"/>
@@ -157,19 +149,7 @@
   </main>
 </div>
 
-<!-- ==================== МОДАЛКА: НОВЫЙ ЧАТ ==================== -->
-<div class="modal" id="newChatModal" style="display:none">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Новый чат</h3>
-      <button class="icon-btn" onclick="closeModal('newChatModal')">✕</button>
-    </div>
-    <input type="text" id="userSearchInput" placeholder="Введите @username..." oninput="searchUsers(this.value)">
-    <div id="userSearchResults" class="search-results"></div>
-  </div>
-</div>
-
-<!-- ==================== МОДАЛКА: ПРОФИЛЬ ==================== -->
+<!-- МОДАЛКА: ПРОФИЛЬ -->
 <div class="modal" id="settingsModal" style="display:none">
   <div class="modal-content settings-modal-content">
     <div class="modal-header">
@@ -250,7 +230,7 @@
   </div>
 </div>
 
-<!-- ==================== ЭКРАН ЗВОНКА ==================== -->
+<!-- ЭКРАН ЗВОНКА -->
 <div class="call-screen" id="callScreen" style="display:none">
   <video id="remoteVideo" autoplay playsinline></video>
   <video id="localVideo" autoplay muted playsinline></video>
@@ -271,14 +251,12 @@
         <line x1="8" y1="23" x2="16" y2="23"/>
       </svg>
     </button>
-
     <button class="call-btn end" onclick="hangUp()" title="Завершить">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.42 19.42 0 01-3.33-2.67m-2.67-3.34a19.79 19.79 0 01-3.07-8.63A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/>
         <line x1="23" y1="1" x2="1" y2="23"/>
       </svg>
     </button>
-
     <button class="call-btn" onclick="toggleCam()" id="camBtn" title="Камера">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polygon points="23 7 16 12 23 17 23 7"/>
@@ -288,19 +266,19 @@
   </div>
 </div>
 
-<!-- ==================== ВХОДЯЩИЙ ЗВОНОК ==================== -->
+<!-- ВХОДЯЩИЙ ЗВОНОК -->
 <div class="incoming-call" id="incomingCall" style="display:none">
   <div class="incoming-content">
     <div class="call-avatar" id="incomingAvatar">?</div>
     <div class="call-name" id="incomingName">—</div>
     <div class="call-status" id="incomingType">Входящий звонок</div>
     <div class="incoming-controls">
-      <button class="call-btn end" onclick="declineCall()" title="Отклонить">
+      <button class="call-btn end" onclick="declineCall()">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.4 1.13 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6z"/>
         </svg>
       </button>
-      <button class="call-btn accept" onclick="acceptCall()" title="Принять">
+      <button class="call-btn accept" onclick="acceptCall()">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.4 1.13 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6z"/>
         </svg>
@@ -311,7 +289,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="config.js"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
