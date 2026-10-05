@@ -1,17 +1,15 @@
-/* ===== СБРОС ===== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ============================================================
+   MINDOFI — Login page styles
+   ============================================================ */
 
-/* ===== ЦВЕТА: СВЕТЛАЯ ТЕМА ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --bg: #ffffff;          /* фон */
-  --panel: #f5f7ff;       /* панель */
-  --text: #0a0a0a;        /* чёрный текст */
-  --text-2: #4a5568;      /* серый текст */
-  --accent: #1e3a8a;      /* тёмно-синий */
+  --bg: #ffffff;
+  --panel: #f5f7ff;
+  --text: #0a0a0a;
+  --text-2: #4a5568;
+  --accent: #1e3a8a;
   --accent-hover: #172e6e;
   --border: #e2e8f0;
   --input-bg: #ffffff;
@@ -20,11 +18,10 @@
   --shadow: 0 10px 40px rgba(30, 58, 138, 0.08);
 }
 
-/* ===== ЦВЕТА: ТЁМНАЯ ТЕМА ===== */
 [data-theme="dark"] {
-  --bg: #0f1734;          /* тёмно-синий фон */
+  --bg: #0f1734;
   --panel: #1a2456;
-  --text: #ffffff;        /* белый текст */
+  --text: #ffffff;
   --text-2: #a0aec0;
   --accent: #4a5fe8;
   --accent-hover: #6c5ce7;
@@ -33,7 +30,6 @@
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* ===== БАЗА ===== */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
@@ -47,7 +43,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== КНОПКА ТЕМЫ ===== */
+/* === Theme toggle === */
 .theme-toggle {
   position: fixed;
   top: 20px;
@@ -60,6 +56,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   padding: 0;
+  z-index: 100;
 }
 
 .theme-toggle::after {
@@ -78,7 +75,49 @@ body {
   transform: translateX(20px);
 }
 
-/* ===== КАРТОЧКА ===== */
+/* === Language picker === */
+.lang-top {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+}
+
+.lang-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.lang-switch button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.lang-switch button:hover {
+  background: var(--input-bg);
+  color: var(--accent);
+}
+
+.lang-switch button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* === Card === */
 .card {
   background: var(--panel);
   border-radius: 24px;
@@ -87,7 +126,6 @@ body {
   max-width: 380px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  transition: background 0.3s, border-color 0.3s;
 }
 
 .logo {
@@ -114,11 +152,11 @@ body {
   margin-bottom: 26px;
 }
 
-/* ===== ЭКРАНЫ ===== */
+/* === Screens === */
 .screen { display: none; }
 .screen.active { display: block; }
 
-/* ===== СООБЩЕНИЯ ===== */
+/* === Messages === */
 .error, .success {
   padding: 10px 14px;
   border-radius: 10px;
@@ -126,20 +164,24 @@ body {
   margin-bottom: 14px;
   display: none;
   font-weight: 500;
+  word-break: break-word;
 }
+
 .error {
   background: rgba(220, 38, 38, 0.1);
   color: var(--error);
   border: 1px solid rgba(220, 38, 38, 0.2);
 }
+
 .success {
   background: rgba(22, 163, 74, 0.1);
   color: var(--success);
   border: 1px solid rgba(22, 163, 74, 0.2);
 }
+
 .error.show, .success.show { display: block; }
 
-/* ===== ПОЛЕ ТЕЛЕФОНА ===== */
+/* === Phone === */
 .phone-row {
   display: flex;
   gap: 8px;
@@ -157,7 +199,6 @@ body {
   font-weight: 600;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
 }
 
 .country-select:focus { border-color: var(--accent); }
@@ -172,8 +213,8 @@ body {
   color: var(--text);
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s;
   width: 100%;
+  transition: border-color 0.2s;
 }
 
 .phone-input::placeholder,
@@ -186,7 +227,7 @@ body {
   border-color: var(--accent);
 }
 
-/* ===== OTP ===== */
+/* === OTP === */
 .otp-row {
   display: flex;
   gap: 8px;
@@ -210,7 +251,7 @@ body {
 
 .otp-input:focus { border-color: var(--accent); }
 
-/* ===== АВАТАР ===== */
+/* === Avatar === */
 .avatar-upload {
   width: 96px;
   height: 96px;
@@ -248,10 +289,8 @@ body {
   font-weight: 600;
 }
 
-/* ===== ПОЛЯ ===== */
-.field {
-  margin-bottom: 12px;
-}
+/* === Field === */
+.field { margin-bottom: 12px; }
 
 .hint {
   text-align: center;
@@ -260,7 +299,7 @@ body {
   margin-bottom: 18px;
 }
 
-/* ===== КНОПКА ===== */
+/* === Button === */
 .btn {
   width: 100%;
   height: 50px;
@@ -273,14 +312,13 @@ body {
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
   margin-top: 4px;
-  letter-spacing: 0.3px;
 }
 
 .btn:hover:not(:disabled) { background: var(--accent-hover); }
 .btn:active:not(:disabled) { transform: scale(0.98); }
 .btn:disabled { opacity: 0.5; cursor: wait; }
 
-/* ===== ССЫЛКИ ===== */
+/* === Link === */
 .link {
   text-align: center;
   margin-top: 16px;
@@ -298,10 +336,9 @@ body {
 
 .link a:hover { opacity: 0.7; }
 
-/* ===== УТИЛИТЫ ===== */
 .hidden { display: none !important; }
 
-/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+/* === Mobile === */
 @media (max-width: 420px) {
   .card {
     padding: 28px 20px 24px;
@@ -314,53 +351,7 @@ body {
   }
   .title { font-size: 24px; }
   .logo { width: 72px; height: 72px; }
-}
-
-/* === Переключатель языка === */
-.lang-top {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 100;
-}
-
-.lang-switch {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 6px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.lang-switch button {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-
-.lang-switch button:hover {
-  background: var(--hover);
-  color: var(--accent);
-}
-
-.lang-switch button.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-@media (max-width: 480px) {
-  .lang-switch button {
-    padding: 5px 8px;
-    font-size: 11px;
-  }
+  .lang-switch button { padding: 5px 8px; font-size: 11px; }
+  .lang-top { top: 12px; left: 12px; }
+  .theme-toggle { top: 12px; right: 12px; }
 }
