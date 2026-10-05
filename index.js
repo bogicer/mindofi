@@ -1,6 +1,5 @@
 // ============================================================
 //  MINDOFI — Login / Register logic
-//  TEST MODE: OTP is shown in the interface
 // ============================================================
 
 let currentMode = 'login';
@@ -43,7 +42,7 @@ function toggleMode() {
   const link = document.getElementById('modeLink');
   const key = currentMode === 'login' ? 'link_register' : 'link_login';
   link.dataset.i18n = key;
-  link.textContent = t(key);
+  if (typeof t === 'function') link.textContent = t(key);
 }
 
 // ============================================================
@@ -80,7 +79,7 @@ async function apiPost(path, data) {
     return await res.json();
   } catch (e) {
     console.error('API error:', e);
-    return { success: false, error: t('err_no_server') };
+    return { success: false, error: (typeof t === 'function' ? t('err_no_server') : 'No connection') };
   }
 }
 
@@ -92,7 +91,7 @@ async function sendOtp() {
   const num = document.getElementById('phoneInput').value.replace(/\D/g, '');
 
   if (!num || num.length < 5) {
-    showError(t('err_fill_phone'));
+    showError(typeof t === 'function' ? t('err_fill_phone') : 'Enter phone');
     return;
   }
 
@@ -100,30 +99,26 @@ async function sendOtp() {
 
   const btn = document.getElementById('phoneBtn');
   btn.disabled = true;
-  btn.textContent = t('loading');
+  btn.textContent = typeof t === 'function' ? t('loading') : 'Loading...';
 
   const res = await apiPost('auth/otp', { phone: otpPhone });
 
   btn.disabled = false;
-  btn.textContent = t('btn_continue');
+  btn.textContent = typeof t === 'function' ? t('btn_continue') : 'Continue';
 
   if (!res.success) {
-    showError(res.error || t('err_sms_failed'));
+    showError(res.error || (typeof t === 'function' ? t('err_sms_failed') : 'SMS error'));
     return;
   }
 
-  // TEST MODE: show code
   otpCode = res.otp || '';
-  document.getElementById('otpHint').textContent = t('otp_sent_to') + otpPhone;
+  document.getElementById('otpHint').textContent = (typeof t === 'function' ? t('otp_sent_to') : 'Code sent to +') + otpPhone;
 
   if (otpCode) {
-    showSuccess(t('test_code') + otpCode);
-    console.log(
-      '%c🧪 OTP: ' + otpCode,
-      'background:#1e3a8a;color:#fff;padding:10px 16px;border-radius:8px;font-size:20px;font-weight:bold;'
-    );
+    showSuccess((typeof t === 'function' ? t('test_code') : '🧪 CODE: ') + otpCode);
+    console.log('%c🧪 OTP: ' + otpCode, 'background:#1e3a8a;color:#fff;padding:10px 16px;border-radius:8px;font-size:20px;font-weight:bold;');
   } else {
-    showSuccess(t('ok_sms_sent') + otpPhone);
+    showSuccess((typeof t === 'function' ? t('ok_sms_sent') : 'SMS sent to +') + otpPhone);
   }
 
   showScreen('Otp');
@@ -162,13 +157,12 @@ async function verifyOtp() {
   const code = getOtpValue();
 
   if (code.length !== 5) {
-    showError(t('err_enter_5_digits'));
+    showError(typeof t === 'function' ? t('err_enter_5_digits') : 'Enter 5 digits');
     return;
   }
 
-  // Test check
   if (otpCode && code !== otpCode) {
-    showError(t('err_wrong_code'));
+    showError(typeof t === 'function' ? t('err_wrong_code') : 'Wrong code');
     for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
     document.getElementById('o1').focus();
     return;
@@ -180,20 +174,19 @@ async function verifyOtp() {
     return;
   }
 
-  // LOGIN
   const res = await apiPost('auth/login', { phone: otpPhone, otp: code });
 
   if (res.success) {
     localStorage.setItem('mindofi_token', res.token);
     localStorage.setItem('mindofi_user', JSON.stringify(res.user));
     localStorage.setItem('mindofi_phone', otpPhone);
-    showSuccess(t('ok_login_done'));
+    showSuccess(typeof t === 'function' ? t('ok_login_done') : 'Login OK');
 
     setTimeout(() => {
       window.location.href = 'app.html';
     }, 600);
   } else {
-    showError(res.error || t('err_wrong_code'));
+    showError(res.error || (typeof t === 'function' ? t('err_wrong_code') : 'Wrong code'));
   }
 }
 
@@ -205,7 +198,7 @@ function onAvatarPick(input) {
   if (!file) return;
 
   if (file.size > 2 * 1024 * 1024) {
-    showError(t('err_avatar_large'));
+    showError(typeof t === 'function' ? t('err_avatar_large') : 'Avatar up to 2 MB');
     return;
   }
 
@@ -224,7 +217,7 @@ function onAvatarPick(input) {
 async function doRegister() {
   const name = document.getElementById('nameInput').value.trim();
   if (!name) {
-    showError(t('err_enter_name'));
+    showError(typeof t === 'function' ? t('err_enter_name') : 'Enter name');
     return;
   }
 
@@ -250,13 +243,13 @@ async function doRegister() {
     localStorage.setItem('mindofi_token', res.token);
     localStorage.setItem('mindofi_user', JSON.stringify(res.user));
     localStorage.setItem('mindofi_phone', otpPhone);
-    showSuccess(t('ok_account_created'));
+    showSuccess(typeof t === 'function' ? t('ok_account_created') : 'Account created');
 
     setTimeout(() => {
       window.location.href = 'app.html';
     }, 600);
   } else {
-    showError(res.error || t('error'));
+    showError(res.error || (typeof t === 'function' ? t('error') : 'Error'));
   }
 }
 
@@ -275,13 +268,29 @@ document.getElementById('usernameInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') doRegister();
 });
 
-// Re-apply translations after DOM is ready
+// ============================================================
+//  APPLY TRANSLATIONS ON LOAD + HIGHLIGHT CURRENT LANG
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Применяем переводы
   if (typeof applyTranslations === 'function') applyTranslations();
-  if (typeof setLang === 'function') {
-    const lang = getLang ? getLang() : 'en';
+
+  // Подсвечиваем активный язык
+  if (typeof getLang === 'function') {
+    const lang = getLang();
     document.querySelectorAll('.lang-switch button').forEach(b => {
       b.classList.toggle('active', b.dataset.lang === lang);
     });
   }
 });
+
+// На случай, если DOMContentLoaded уже прошёл
+if (document.readyState !== 'loading') {
+  if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof getLang === 'function') {
+    const lang = getLang();
+    document.querySelectorAll('.lang-switch button').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+}
