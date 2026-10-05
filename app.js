@@ -1,9 +1,9 @@
 // ============================================================
-//  MINDOFI — Основная логика приложения
+//  MINDOFI — Main app logic
 // ============================================================
 
 // ============================================================
-//  ФИКС ВЫСОТЫ ДЛЯ МОБИЛЬНЫХ
+//  MOBILE HEIGHT FIX
 // ============================================================
 function updateAppHeight() {
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -26,7 +26,7 @@ document.addEventListener('focusin', (e) => {
 document.addEventListener('focusout', () => setTimeout(updateAppHeight, 300));
 
 // ============================================================
-//  СОСТОЯНИЕ
+//  STATE
 // ============================================================
 let currentUser = null;
 let currentToken = null;
@@ -38,7 +38,7 @@ let searchFilter = '';
 let pollingTimer = null;
 let newAvatarBase64 = null;
 
-// Звонки
+// Calls
 let pc = null;
 let localStream = null;
 let remoteStream = null;
@@ -56,14 +56,13 @@ let camOff = false;
 let watchInterval = null;
 let ringtoneCtx = null;
 
-// Голосовые
+// Voice
 let vrec = null;
 let vchunks = [];
 let vsec = 0;
 let vtimer = null;
 let visRecording = false;
 
-// Играющие audio (для восстановления после перерисовки)
 const playingAudios = new Map();
 
 const ICE_CONFIG = {
@@ -132,6 +131,9 @@ async function init() {
       if (e.target === m) m.style.display = 'none';
     });
   });
+
+  // Re-apply translations after init
+  if (typeof applyTranslations === 'function') applyTranslations();
 }
 
 function bindTextarea() {
@@ -197,14 +199,14 @@ async function apiRequest(path, method = 'GET', data = null) {
 }
 
 // ============================================================
-//  ТЕМА
+//  THEME
 // ============================================================
 let dark = localStorage.getItem('mindofi_dark') === '1';
 
 function applyTheme() {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   const el = document.getElementById('themeValue');
-  if (el) el.textContent = dark ? 'Вкл.' : 'Выкл.';
+  if (el) el.textContent = dark ? t('theme_on') : t('theme_off');
 }
 
 function toggleTheme() {
@@ -214,7 +216,7 @@ function toggleTheme() {
 }
 
 // ============================================================
-//  МОЙ ПРОФИЛЬ
+//  MY PROFILE
 // ============================================================
 function renderMe() {
   if (!currentUser) return;
@@ -224,8 +226,8 @@ function renderMe() {
   const meStatus = document.getElementById('meStatus');
   const mobileAvatar = document.getElementById('mobileProfileAvatar');
 
-  meName.textContent = currentUser.name || 'Без имени';
-  meStatus.textContent = 'В сети';
+  meName.textContent = currentUser.name || '—';
+  meStatus.textContent = t('status_online');
 
   if (currentUser.photoURL) {
     meAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" alt="">';
@@ -238,7 +240,7 @@ function renderMe() {
 }
 
 // ============================================================
-//  ПОЛЬЗОВАТЕЛИ
+//  USERS
 // ============================================================
 async function loadUsers() {
   const chats = await apiRequest('messages');
@@ -263,7 +265,7 @@ async function loadUsers() {
 }
 
 // ============================================================
-//  СПИСОК ЧАТОВ
+//  CHAT LIST
 // ============================================================
 function renderChatList() {
   const list = document.getElementById('chatList');
@@ -299,7 +301,7 @@ function renderChatList() {
 
   if (!filtered.length) {
     list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">' +
-      (chatItems.length === 0 ? 'Чатов пока нет. Нажмите + чтобы начать.' : 'Ничего не найдено') +
+      (chatItems.length === 0 ? t('no_chats') : t('nothing_found')) +
       '</div>';
     return;
   }
@@ -311,12 +313,17 @@ function renderChatList() {
 
     const avatarHTML = item.user.photoURL
       ? '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '"><img src="' + item.user.photoURL + '" alt=""></div>'
-      : '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '" style="background:var(--accent)">' +
+      : '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '">' +
         (item.user.name || '?')[0].toUpperCase() + '</div>';
 
-    let preview = 'Нет сообщений';
+    let preview = t('no_messages_yet');
     if (item.lastMsg) {
-      const typeLabels = { voice: '🎤 Голосовое', krujok: '📹 Кружок', image: '📷 Фото', file: '📎 Файл' };
+      const typeLabels = {
+        voice: t('preview_voice'),
+        krujok: t('preview_krujok'),
+        image: t('preview_image'),
+        file: t('preview_file')
+      };
       preview = typeLabels[item.lastMsg.type] || item.lastMsg.text || '...';
     }
     const time = item.lastMsg ? formatTime(item.lastMsg.timestamp) : '';
@@ -333,7 +340,7 @@ function renderChatList() {
 }
 
 // ============================================================
-//  ОТКРЫТИЕ ЧАТА
+//  OPEN CHAT
 // ============================================================
 async function openChat(phone) {
   activeChat = phone;
@@ -351,7 +358,7 @@ async function openChat(phone) {
   }
 
   document.getElementById('chatName').textContent = u.name || phone;
-  document.getElementById('chatStatus').textContent = u.online ? 'В сети' : 'Не в сети';
+  document.getElementById('chatStatus').textContent = u.online ? t('status_online') : t('status_offline');
 
   renderChatList();
   await loadMessages(phone);
@@ -365,7 +372,7 @@ async function openChat(phone) {
 }
 
 // ============================================================
-//  СООБЩЕНИЯ
+//  MESSAGES
 // ============================================================
 function getChatId(phone) {
   return [currentUser.phone, phone].sort().join('_');
@@ -382,10 +389,8 @@ async function loadMessages(phone) {
     );
   }
 
-  // === ФИКС: не перерисовываем, если ничего не изменилось ===
   const oldJson = JSON.stringify(messages[chatId] || []);
   const newJson = JSON.stringify(newMsgs);
-
   messages[chatId] = newMsgs;
 
   if (oldJson !== newJson) {
@@ -396,7 +401,7 @@ async function loadMessages(phone) {
 function renderMessages(phone) {
   const container = document.getElementById('messages');
 
-  // === ФИКС: сохраняем состояние играющих audio ===
+  // Save playing audio state
   playingAudios.clear();
   container.querySelectorAll('audio').forEach(a => {
     if (!a.paused && a.currentTime > 0) {
@@ -410,7 +415,7 @@ function renderMessages(phone) {
   const msgs = messages[chatId] || [];
 
   if (!msgs.length) {
-    container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">Нет сообщений. Начните общение!</div>';
+    container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">' + t('no_messages_start') + '</div>';
     return;
   }
 
@@ -440,7 +445,7 @@ function renderMessages(phone) {
       content = '<video controls src="' + m.url + '" style="max-width:220px;border-radius:12px"></video>';
     } else if (m.type === 'file' && m.url) {
       content = '<a href="' + m.url + '" download style="color:inherit;text-decoration:underline">📎 ' +
-        escapeHtml(m.file_name || 'Файл') + ' (' + (m.file_size || '?') + ')</a>';
+        escapeHtml(m.file_name || 'File') + ' (' + (m.file_size || '?') + ')</a>';
     } else {
       content = escapeHtml(m.text || '');
     }
@@ -455,40 +460,24 @@ function renderMessages(phone) {
 
   container.scrollTop = container.scrollHeight;
 
-  // === ФИКС: восстанавливаем играющие audio ===
+  // Restore playing audio
   playingAudios.forEach((currentTime, id) => {
     const a = document.getElementById(id);
     if (a) {
       try {
         a.currentTime = currentTime;
         a.play().catch(() => {});
-        // Ставим иконку "пауза"
         const btn = a.parentElement?.querySelector('.voice-play');
         if (btn) {
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
         }
-      } catch (e) { console.warn('audio restore failed:', e); }
-    }
-  });
-
-  // Восстанавливаем прогресс волны у играющих
-  playingAudios.forEach((currentTime, id) => {
-    const a = document.getElementById(id);
-    const wave = document.getElementById(id + '_wave');
-    if (a && wave && a.duration) {
-      const progress = currentTime / a.duration;
-      const bars = wave.querySelectorAll('.voice-bar');
-      bars.forEach((b, i) => {
-        const barProgress = i / bars.length;
-        b.style.opacity = barProgress <= progress ? '1' : '0.3';
-        b.style.background = barProgress <= progress ? 'var(--accent)' : 'var(--text-3)';
-      });
+      } catch (e) {}
     }
   });
 }
 
 // ============================================================
-//  ОТПРАВКА
+//  SEND
 // ============================================================
 async function sendMessage() {
   const input = document.getElementById('messageInput');
@@ -515,23 +504,23 @@ async function sendMessage() {
   input.style.height = 'auto';
 
   const res = await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
-  if (!res) toast('Не удалось отправить');
+  if (!res) toast(t('toast_send_error'));
 }
 
 // ============================================================
-//  ФАЙЛЫ
+//  FILES
 // ============================================================
 async function onFilePick(input) {
   const file = input.files[0];
   if (!file || !activeChat) return;
 
   if (file.size > CONFIG.MAX_FILE_SIZE) {
-    toast('Файл слишком большой (макс ' + Math.round(CONFIG.MAX_FILE_SIZE / 1024 / 1024) + ' МБ)');
+    toast(t('toast_file_too_large'));
     input.value = '';
     return;
   }
 
-  toast('Загрузка...');
+  toast(t('toast_uploading'));
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1];
@@ -541,7 +530,7 @@ async function onFilePick(input) {
       type: isImage ? 'image' : 'file'
     });
 
-    if (!res || !res.url) { toast('Ошибка загрузки'); return; }
+    if (!res || !res.url) { toast(t('toast_upload_error')); return; }
 
     const chatId = getChatId(activeChat);
     const msgId = Date.now() + '_f';
@@ -567,7 +556,7 @@ async function onFilePick(input) {
 }
 
 // ============================================================
-//  ГОЛОСОВЫЕ СООБЩЕНИЯ
+//  VOICE MESSAGES
 // ============================================================
 function bindVoiceButton() {
   const vbtn = document.getElementById('voiceBtn');
@@ -577,8 +566,6 @@ function bindVoiceButton() {
   }
   if (vbtn.dataset.bound === '1') return;
   vbtn.dataset.bound = '1';
-
-  console.log('voiceBtn привязана ✅');
 
   vbtn.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -604,13 +591,19 @@ function bindVoiceButton() {
 
 async function startVoiceRecord(e) {
   if (e && e.preventDefault) e.preventDefault();
-  if (!activeChat) { toast('Выберите чат'); return; }
+  if (!activeChat) { toast(t('toast_select_chat')); return; }
   if (visRecording) return;
 
-  console.log('startVoiceRecord: запрос микрофона...');
-
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 48000,
+        channelCount: 1
+      }
+    });
     vchunks = [];
     vsec = 0;
     visRecording = true;
@@ -619,7 +612,10 @@ async function startVoiceRecord(e) {
     if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime = 'audio/webm;codecs=opus';
     else if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
 
-    vrec = new MediaRecorder(stream, { mimeType: mime });
+    vrec = new MediaRecorder(stream, {
+      mimeType: mime,
+      audioBitsPerSecond: 128000
+    });
     vrec.ondataavailable = (ev) => { if (ev.data.size > 0) vchunks.push(ev.data); };
     vrec.start(100);
 
@@ -638,10 +634,9 @@ async function startVoiceRecord(e) {
     }, 1000);
 
     if (navigator.vibrate) navigator.vibrate(50);
-    console.log('Запись началась ✅');
   } catch (err) {
-    console.error('Ошибка записи:', err);
-    toast('Нет доступа к микрофону');
+    console.error('Record error:', err);
+    toast(t('toast_no_mic'));
     visRecording = false;
   }
 }
@@ -665,8 +660,8 @@ async function stopVoiceRecord(cancel) {
 
   if (cancel || vsec < 1) {
     vchunks = [];
-    if (cancel) toast('Отменено');
-    else toast('Слишком коротко');
+    if (cancel) toast(t('toast_cancelled'));
+    else toast(t('toast_too_short'));
     return;
   }
 
@@ -675,15 +670,15 @@ async function stopVoiceRecord(cancel) {
   vchunks = [];
 
   const sizeMB = blob.size / 1024 / 1024;
-  if (sizeMB > 50) { toast('Файл слишком большой'); return; }
+  if (sizeMB > 50) { toast(t('toast_file_too_large')); return; }
 
-  toast('Отправка голосового...');
+  toast(t('toast_uploading'));
 
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1];
     const up = await apiRequest('upload', 'POST', { image: base64, type: 'voice' });
-    if (!up || !up.url) { toast('Ошибка загрузки'); return; }
+    if (!up || !up.url) { toast(t('toast_upload_error')); return; }
 
     const chatId = getChatId(activeChat);
     const msgId = Date.now() + '_v';
@@ -706,13 +701,13 @@ async function stopVoiceRecord(cancel) {
 
     await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
     vsec = 0;
-    toast('Отправлено ✅');
+    toast(t('toast_sent'));
   };
   reader.readAsDataURL(blob);
 }
 
 // ============================================================
-//  ПЛЕЕР ГОЛОСОВЫХ
+//  VOICE PLAYER
 // ============================================================
 function toggleVoice(id, btn) {
   const audio = document.getElementById(id);
@@ -757,15 +752,10 @@ function toggleVoice(id, btn) {
 }
 
 // ============================================================
-//  МОДАЛКИ
+//  MODALS
 // ============================================================
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-function openNewChat() {
-  openModal('newChatModal');
-  setTimeout(() => document.getElementById('userSearchInput').focus(), 100);
-}
 
 // ============================================================
 //  SIDEBAR
@@ -778,12 +768,13 @@ function toggleSidebar() {
 }
 
 // ============================================================
-//  ПОИСК
+//  SEARCH
 // ============================================================
 async function searchUsers(query) {
   const results = document.getElementById('userSearchResults');
+  if (!results) return;
   if (!query || query.length < 2) { results.innerHTML = ''; return; }
-  results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Поиск...</div>';
+  results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('loading') + '</div>';
 
   const username = query.replace(/^@/, '');
   const phone = await apiRequest('usernames/' + username);
@@ -794,7 +785,7 @@ async function searchUsers(query) {
       (u.name || '').toLowerCase().includes(username.toLowerCase())
     );
     if (!found.length) {
-      results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
+      results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('nothing_found') + '</div>';
       return;
     }
     results.innerHTML = '';
@@ -803,13 +794,13 @@ async function searchUsers(query) {
   }
 
   if (phone === currentUser.phone) {
-    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Это вы</div>';
+    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('toast_this_is_you') + '</div>';
     return;
   }
 
   const u = await apiRequest('users/' + phone);
   if (!u || !u.name) {
-    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">Не найдено</div>';
+    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('nothing_found') + '</div>';
     return;
   }
 
@@ -822,14 +813,13 @@ function renderSearchResult(phone, u, container) {
   const el = document.createElement('div');
   el.className = 'search-result';
   el.onclick = () => {
-    closeModal('newChatModal');
     if (!users[phone]) users[phone] = u;
     openChat(phone);
   };
 
   const avatarHTML = u.photoURL
     ? '<div class="chat-item-avatar"><img src="' + u.photoURL + '"></div>'
-    : '<div class="chat-item-avatar" style="background:var(--accent)">' + (u.name || '?')[0].toUpperCase() + '</div>';
+    : '<div class="chat-item-avatar">' + (u.name || '?')[0].toUpperCase() + '</div>';
 
   el.innerHTML = avatarHTML +
     '<div class="chat-item-body">' +
@@ -841,7 +831,7 @@ function renderSearchResult(phone, u, container) {
 }
 
 // ============================================================
-//  ФИЛЬТРЫ
+//  FILTERS
 // ============================================================
 function filterChats(value) { searchFilter = value; renderChatList(); }
 
@@ -854,7 +844,7 @@ function switchTab(tab) {
 }
 
 // ============================================================
-//  ПРОФИЛЬ
+//  PROFILE
 // ============================================================
 function openSettingsModal() {
   if (!currentUser) return;
@@ -882,13 +872,18 @@ function openSettingsModal() {
     document.getElementById('bioCounter').textContent = bioEl.value.length;
   };
 
+  // Highlight current language
+  document.querySelectorAll('.lang-picker button').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === getLang());
+  });
+
   openModal('settingsModal');
 }
 
 function onSettingsAvatarPick(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { toast('Аватар до 2 МБ'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast(t('toast_avatar_too_large')); return; }
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -906,14 +901,14 @@ async function saveProfile() {
   const bio = document.getElementById('settingsBio').value.trim();
   const birthday = document.getElementById('settingsBirthday').value;
 
-  if (!name) { toast('Имя не может быть пустым'); return; }
+  if (!name) { toast(t('err_enter_name')); return; }
 
   if (birthday) {
     const bd = new Date(birthday);
     const now = new Date();
     const age = (now - bd) / (1000 * 60 * 60 * 24 * 365.25);
-    if (age < 13) { toast('Возраст менее 13 лет'); return; }
-    if (age > 120) { toast('Неверная дата'); return; }
+    if (age < 13) { toast(t('toast_age_error')); return; }
+    if (age > 120) { toast(t('toast_date_error')); return; }
   }
 
   let newPhotoUrl = currentUser.photoURL;
@@ -923,7 +918,7 @@ async function saveProfile() {
       type: 'image'
     });
     if (up && up.url) newPhotoUrl = up.url;
-    else { toast('Не удалось загрузить аватар'); return; }
+    else { toast(t('toast_upload_error')); return; }
   }
 
   const patch = {
@@ -935,7 +930,7 @@ async function saveProfile() {
   };
 
   const res = await apiRequest('users/' + currentUser.phone, 'PATCH', patch);
-  if (!res) { toast('Ошибка сохранения'); return; }
+  if (!res) { toast(t('error')); return; }
 
   currentUser.name = name;
   currentUser.username = username ? '@' + username : null;
@@ -945,7 +940,7 @@ async function saveProfile() {
   localStorage.setItem('mindofi_user', JSON.stringify(currentUser));
 
   renderMe();
-  toast('Профиль сохранён ✅');
+  toast(t('toast_profile_saved'));
   closeModal('settingsModal');
 }
 
@@ -954,16 +949,16 @@ async function changePassword() {
   const nw = document.getElementById('settingsNewPwd').value;
   const rep = document.getElementById('settingsRepeatPwd').value;
 
-  if (nw.length < 6) { toast('Пароль минимум 6 символов'); return; }
-  if (nw !== rep) { toast('Пароли не совпадают'); return; }
+  if (nw.length < 6) { toast(t('toast_pwd_short')); return; }
+  if (nw !== rep) { toast(t('toast_wrong_pwd')); return; }
 
   const res = await apiRequest('auth/set-password', 'POST', { current: cur, new: nw });
-  if (!res || !res.success) { toast(res && res.error ? res.error : 'Ошибка'); return; }
+  if (!res || !res.success) { toast(res && res.error ? res.error : t('error')); return; }
 
   document.getElementById('settingsCurrentPwd').value = '';
   document.getElementById('settingsNewPwd').value = '';
   document.getElementById('settingsRepeatPwd').value = '';
-  toast('Пароль установлен ✅');
+  toast(t('toast_password_set'));
 }
 
 // ============================================================
@@ -972,7 +967,6 @@ async function changePassword() {
 function startPolling() {
   clearInterval(pollingTimer);
   pollingTimer = setInterval(async () => {
-    // Не грузим, если вкладка скрыта
     if (document.hidden) return;
 
     updatePresence(true);
@@ -992,7 +986,7 @@ async function updatePresence(online) {
 }
 
 // ============================================================
-//  ВЫХОД
+//  LOGOUT
 // ============================================================
 async function logout() {
   if (currentUser) await updatePresence(false);
@@ -1003,7 +997,7 @@ async function logout() {
 }
 
 // ============================================================
-//  УТИЛИТЫ
+//  UTILS
 // ============================================================
 function escapeHtml(str) {
   if (!str) return '';
@@ -1020,20 +1014,20 @@ function formatTime(ts) {
   if (sameDay) {
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
-  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
 }
 
 function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' Б';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
-  return (bytes / 1024 / 1024).toFixed(1) + ' МБ';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
 }
 
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  const tEl = document.getElementById('toast');
+  tEl.textContent = msg;
+  tEl.classList.add('show');
+  setTimeout(() => tEl.classList.remove('show'), 3000);
 }
 
 function openImage(url) { window.open(url, '_blank'); }
@@ -1046,11 +1040,11 @@ function openProfile() {
 }
 
 // ============================================================
-//  ЗВОНКИ
+//  CALLS
 // ============================================================
 async function initCall(type) {
-  if (!activeChat) { toast('Выберите чат'); return; }
-  if (pc) { toast('Уже идёт звонок'); return; }
+  if (!activeChat) { toast(t('toast_select_chat')); return; }
+  if (pc) { toast(t('call_calling')); return; }
 
   callType = type;
   callRole = 'caller';
@@ -1063,7 +1057,7 @@ async function initCall(type) {
       : { audio: true, video: false };
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    toast('Нет доступа к ' + (type === 'video' ? 'камере' : 'микрофону'));
+    toast(t('toast_no_mic'));
     return;
   }
 
@@ -1115,7 +1109,7 @@ async function initCall(type) {
     tries++;
     if (tries > 40) {
       clearInterval(callPollInterval);
-      toast('Нет ответа');
+      toast(t('call_no_answer'));
       hangUp();
       return;
     }
@@ -1123,7 +1117,7 @@ async function initCall(type) {
     if (!callData) return;
     if (callData.status === 'declined') {
       clearInterval(callPollInterval);
-      toast('Отклонён');
+      toast(t('call_declined'));
       hangUp();
       return;
     }
@@ -1160,7 +1154,7 @@ async function acceptCall() {
       : { audio: true, video: false };
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    toast('Нет доступа');
+    toast(t('toast_no_mic'));
     await apiRequest('calls/' + callId, 'PATCH', { status: 'declined' });
     resetCall();
     return;
@@ -1226,7 +1220,7 @@ async function acceptCall() {
     }, 1500);
   } catch (e) {
     console.error(e);
-    toast('Ошибка');
+    toast(t('error'));
     hangUp();
   }
 
@@ -1293,7 +1287,7 @@ function showCallScreen(type, role, user) {
   }
 
   callName.textContent = user ? user.name : callTarget;
-  callStatus.textContent = role === 'caller' ? 'Вызов...' : 'Соединение...';
+  callStatus.textContent = role === 'caller' ? t('call_calling') : t('call_connecting');
   callStatus.style.display = 'block';
   callTimer.style.display = 'none';
   callTimer.textContent = '00:00';
@@ -1358,7 +1352,7 @@ function showIncoming(callData) {
   }
 
   name.textContent = caller ? caller.name : callData.caller;
-  type.textContent = callData.call_type === 'video' ? '📹 Видеозвонок' : '📞 Аудиозвонок';
+  type.textContent = callData.call_type === 'video' ? '📹 ' + t('call_video') : '📞 ' + t('call_voice');
 
   document.getElementById('incomingCall').style.display = 'flex';
   try { playRingtone(); } catch (e) {}
@@ -1386,7 +1380,7 @@ function playRingtone() {
 }
 
 // ============================================================
-//  ПРИВЯЗКА КНОПКИ ГОЛОСОВЫХ — независимо от init()
+//  BIND VOICE BUTTON (independent from init)
 // ============================================================
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bindVoiceButton);
@@ -1396,4 +1390,4 @@ if (document.readyState === 'loading') {
 setTimeout(bindVoiceButton, 1000);
 setTimeout(bindVoiceButton, 3000);
 
-console.log('app.js загружен ✅');
+console.log('app.js loaded ✅');
