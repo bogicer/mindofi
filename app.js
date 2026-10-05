@@ -1,7 +1,36 @@
 // ============================================================
-//  MINDOFI — Основная логика
+//  MINDOFI — Основная логика приложения
 // ============================================================
 
+// ============================================================
+//  ФИКС ВЫСОТЫ ДЛЯ МОБИЛЬНЫХ
+// ============================================================
+function updateAppHeight() {
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-height', vh + 'px');
+}
+
+updateAppHeight();
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateAppHeight);
+  window.visualViewport.addEventListener('scroll', updateAppHeight);
+}
+window.addEventListener('resize', updateAppHeight);
+window.addEventListener('orientationchange', () => setTimeout(updateAppHeight, 300));
+
+document.addEventListener('focusin', (e) => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+    setTimeout(updateAppHeight, 300);
+  }
+});
+document.addEventListener('focusout', () => {
+  setTimeout(updateAppHeight, 300);
+});
+
+// ============================================================
+//  СОСТОЯНИЕ
+// ============================================================
 let currentUser = null;
 let currentToken = null;
 let activeChat = null;
@@ -12,6 +41,7 @@ let searchFilter = '';
 let pollingTimer = null;
 let newAvatarBase64 = null;
 
+// Звонки
 let pc = null;
 let localStream = null;
 let remoteStream = null;
@@ -64,7 +94,6 @@ async function init() {
   applyTheme();
   renderMe();
 
-  // Мобильные: сайдбар закрыт, оверлей скрыт
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
@@ -75,6 +104,8 @@ async function init() {
   startPolling();
   startCallWatcher();
 
+  updateAppHeight();
+
   window.addEventListener('beforeunload', () => {
     updatePresence(false);
   });
@@ -84,13 +115,15 @@ async function init() {
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('show');
     }
+    updateAppHeight();
   });
 
   const ta = document.getElementById('messageInput');
   if (ta) {
     ta.addEventListener('input', function() {
       this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+      updateAppHeight();
     });
     ta.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -314,6 +347,8 @@ async function openChat(phone) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('show');
   }
+
+  updateAppHeight();
 }
 
 // ============================================================
