@@ -3,7 +3,7 @@
 //  TEST MODE: OTP is shown in the interface
 // ============================================================
 
-let currentMode = 'login';   // 'login' | 'register'
+let currentMode = 'login';
 let otpPhone = '';
 let otpCode = '';
 let avatarData = null;
@@ -41,10 +41,9 @@ function goBack(screen) {
 function toggleMode() {
   currentMode = currentMode === 'login' ? 'register' : 'login';
   const link = document.getElementById('modeLink');
-  link.textContent = currentMode === 'login'
-    ? t('link_register')
-    : t('link_login');
-  link.dataset.i18n = currentMode === 'login' ? 'link_register' : 'link_login';
+  const key = currentMode === 'login' ? 'link_register' : 'link_login';
+  link.dataset.i18n = key;
+  link.textContent = t(key);
 }
 
 // ============================================================
@@ -113,7 +112,7 @@ async function sendOtp() {
     return;
   }
 
-  // TEST MODE
+  // TEST MODE: show code
   otpCode = res.otp || '';
   document.getElementById('otpHint').textContent = t('otp_sent_to') + otpPhone;
 
@@ -276,7 +275,13 @@ document.getElementById('usernameInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') doRegister();
 });
 
-// Re-apply translations after load
+// Re-apply translations after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   if (typeof applyTranslations === 'function') applyTranslations();
+  if (typeof setLang === 'function') {
+    const lang = getLang ? getLang() : 'en';
+    document.querySelectorAll('.lang-switch button').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
 });
