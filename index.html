@@ -1,25 +1,35 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+
+  <div class="lang-top">
+    <div class="lang-switch" id="langSwitch">
+      <button data-lang="en" class="active">English</button>
+      <button data-lang="uk">Ураїнська</button>
+      <button data-lang="ru">Руский</button>
+      <button data-lang="pl">Polski</button>
+      <button data-lang="de">Deutsch</button>
+    </div>
+  </div>
 
   <div class="card">
     <img src="logo.png" alt="MINDOFI" class="logo">
     <h1 class="title">MINDOFI</h1>
-    <p class="subtitle">Безопасный мессенджер</p>
+    <p class="subtitle" data-i18n="subtitle">Secure Messenger</p>
 
     <div class="error" id="errBox"></div>
     <div class="success" id="okBox"></div>
 
-    <!-- ЭКРАН 1: телефон -->
+    <!-- STEP 1: Phone -->
     <div class="screen active" id="screenPhone">
       <div class="phone-row">
         <select class="country-select" id="countrySelect">
@@ -31,17 +41,18 @@
           <option value="49">🇩🇪 +49</option>
           <option value="48">🇵🇱 +48</option>
         </select>
-        <input class="phone-input" id="phoneInput" type="tel" maxlength="15" placeholder="50 123 45 67">
+        <input class="phone-input" id="phoneInput" type="tel" maxlength="15"
+               placeholder="50 123 45 67" data-i18n-ph="phone_placeholder">
       </div>
-      <button class="btn" id="phoneBtn" onclick="sendOtp()">Продолжить</button>
+      <button class="btn" id="phoneBtn" onclick="sendOtp()" data-i18n="btn_continue">Continue</button>
       <div class="link">
-        <a id="modeLink" onclick="toggleMode()">Нет аккаунта? Зарегистрироваться</a>
+        <a id="modeLink" onclick="toggleMode()" data-i18n="link_register">No account? Sign up</a>
       </div>
     </div>
 
-    <!-- ЭКРАН 2: OTP -->
+    <!-- STEP 2: OTP -->
     <div class="screen" id="screenOtp">
-      <p class="hint" id="otpHint">Код отправлен на +380...</p>
+      <p class="hint" id="otpHint">Code sent to +380...</p>
       <div class="otp-row">
         <input class="otp-input" id="o1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
         <input class="otp-input" id="o2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
@@ -49,30 +60,33 @@
         <input class="otp-input" id="o4" maxlength="1" inputmode="numeric" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
         <input class="otp-input" id="o5" maxlength="1" inputmode="numeric" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
       </div>
-      <button class="btn" onclick="verifyOtp()">Подтвердить</button>
-      <div class="link"><a onclick="goBack('phone')">← Назад</a></div>
+      <button class="btn" onclick="verifyOtp()" data-i18n="btn_confirm">Confirm</button>
+      <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
     </div>
 
-    <!-- ЭКРАН 3: регистрация -->
+    <!-- STEP 3: Name / Username / Avatar -->
     <div class="screen" id="screenName">
       <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
         <div class="plus">+</div>
-        <div class="avatar-label">Фото</div>
+        <div class="avatar-label" data-i18n="avatar_label">Photo</div>
         <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="onAvatarPick(this)">
       </div>
       <div class="field">
-        <input class="text-input" id="nameInput" maxlength="40" placeholder="Ваше имя">
+        <input class="text-input" id="nameInput" maxlength="40"
+               placeholder="Your name" data-i18n-ph="name_placeholder">
       </div>
       <div class="field">
-        <input class="text-input" id="usernameInput" maxlength="30" placeholder="@username (необязательно)">
+        <input class="text-input" id="usernameInput" maxlength="30"
+               placeholder="@username (optional)" data-i18n-ph="username_placeholder">
       </div>
-      <button class="btn" onclick="doRegister()">Создать аккаунт</button>
-      <div class="link"><a onclick="goBack('phone')">← Назад</a></div>
+      <button class="btn" onclick="doRegister()" data-i18n="btn_create_account">Create account</button>
+      <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
     </div>
 
   </div>
 
   <script src="config.js"></script>
+  <script src="lang.js"></script>
   <script src="index.js"></script>
 </body>
 </html>
