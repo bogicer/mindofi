@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="app.css?v=5">
+  <link rel="stylesheet" href="app.css?v=7">
 </head>
 <body>
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Меню">
+<button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Menu">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
     <line x1="3" y1="6" x2="21" y2="6"/>
     <line x1="3" y1="12" x2="21" y2="12"/>
@@ -17,7 +17,7 @@
   </svg>
 </button>
 
-<button class="mobile-profile-btn" id="mobileProfileBtn" onclick="openSettingsModal()" aria-label="Профиль">
+<button class="mobile-profile-btn" id="mobileProfileBtn" onclick="openSettingsModal()" aria-label="Profile">
   <span id="mobileProfileAvatar">?</span>
 </button>
 
@@ -30,7 +30,7 @@
       <img src="logo.png" alt="MINDOFI" class="sidebar-logo">
       <span class="sidebar-title">MINDOFI</span>
       <div class="sidebar-actions">
-        <button class="icon-btn" title="Тема" onclick="toggleTheme()">
+        <button class="icon-btn" title="Theme" data-i18n-title="btn_theme" onclick="toggleTheme()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5"/>
             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
@@ -44,13 +44,13 @@
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.35-4.35"/>
       </svg>
-      <input id="searchInput" placeholder="Поиск..." oninput="filterChats(this.value)">
+      <input id="searchInput" placeholder="Search..." data-i18n-ph="search" oninput="filterChats(this.value)">
     </div>
 
     <div class="tabs">
-      <div class="tab active" data-tab="all" onclick="switchTab('all')">Все</div>
-      <div class="tab" data-tab="groups" onclick="switchTab('groups')">Группы</div>
-      <div class="tab" data-tab="channels" onclick="switchTab('channels')">Каналы</div>
+      <div class="tab active" data-tab="all" data-i18n="tab_all" onclick="switchTab('all')">All</div>
+      <div class="tab" data-tab="groups" data-i18n="tab_groups" onclick="switchTab('groups')">Groups</div>
+      <div class="tab" data-tab="channels" data-i18n="tab_channels" onclick="switchTab('channels')">Channels</div>
     </div>
 
     <div class="chat-list" id="chatList"></div>
@@ -60,7 +60,7 @@
         <div class="me-avatar" id="meAvatar">?</div>
         <div class="me-info">
           <div class="me-name" id="meName">—</div>
-          <div class="me-status" id="meStatus">В сети</div>
+          <div class="me-status" id="meStatus" data-i18n="status_online">Online</div>
         </div>
       </div>
       <button class="icon-btn" onclick="openSettingsModal()">
@@ -77,7 +77,7 @@
     <div class="empty-state" id="emptyState">
       <img src="logo.png" alt="MINDOFI" class="empty-logo">
       <div class="empty-title">MINDOFI</div>
-      <div class="empty-text">Выберите чат слева или создайте новый</div>
+      <div class="empty-text" data-i18n="empty_text">Select a chat on the left or create a new one</div>
     </div>
 
     <div class="chat" id="chatArea" style="display:none">
@@ -93,12 +93,12 @@
           <div class="chat-status" id="chatStatus"></div>
         </div>
         <div class="chat-actions">
-          <button class="icon-btn" title="Аудиозвонок" onclick="initCall('audio')">
+          <button class="icon-btn" title="Audio call" data-i18n-title="btn_audio_call" onclick="initCall('audio')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.4 1.13 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6z"/>
             </svg>
           </button>
-          <button class="icon-btn" title="Видеозвонок" onclick="initCall('video')">
+          <button class="icon-btn" title="Video call" data-i18n-title="btn_video_call" onclick="initCall('video')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"/>
               <rect x="1" y="5" width="15" height="14" rx="2"/>
@@ -109,23 +109,22 @@
 
       <div class="messages" id="messages"></div>
 
-      <!-- Индикатор записи -->
       <div class="recording-bar" id="recordingBar" style="display:none">
         <div class="rec-dot"></div>
-        <span>Запись</span>
+        <span data-i18n="recording">Recording</span>
         <span class="rec-timer" id="recordingTimer">0:00</span>
-        <span class="rec-hint">Отпустите, чтобы отправить</span>
+        <span class="rec-hint" data-i18n="rec_hint">Release to send</span>
       </div>
 
       <div class="input-bar">
-        <button class="icon-btn" title="Прикрепить файл" onclick="document.getElementById('fileInput').click()">
+        <button class="icon-btn" title="Attach file" data-i18n-title="btn_attach" onclick="document.getElementById('fileInput').click()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
           </svg>
         </button>
         <input type="file" id="fileInput" style="display:none" onchange="onFilePick(this)">
 
-        <button class="icon-btn" title="Удерживайте для записи" id="voiceBtn" type="button">
+        <button class="icon-btn" title="Hold to record" data-i18n-title="btn_voice" id="voiceBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
             <path d="M19 10v2a7 7 0 01-14 0v-2"/>
@@ -135,7 +134,7 @@
         </button>
 
         <div class="input-wrapper">
-          <textarea id="messageInput" rows="1" placeholder="Сообщение..."></textarea>
+          <textarea id="messageInput" rows="1" placeholder="Message..." data-i18n-ph="message_placeholder"></textarea>
         </div>
 
         <button class="icon-btn send-btn" onclick="sendMessage()">
@@ -149,11 +148,11 @@
   </main>
 </div>
 
-<!-- МОДАЛКА: ПРОФИЛЬ -->
+<!-- MODAL: PROFILE -->
 <div class="modal" id="settingsModal" style="display:none">
   <div class="modal-content settings-modal-content">
     <div class="modal-header">
-      <h3>Профиль</h3>
+      <h3 data-i18n="profile">Profile</h3>
       <button class="icon-btn" onclick="closeModal('settingsModal')">✕</button>
     </div>
 
@@ -168,73 +167,84 @@
         </div>
       </div>
       <input type="file" id="settingsAvatarInput" style="display:none" accept="image/*" onchange="onSettingsAvatarPick(this)">
-      <div class="settings-hint">Нажмите, чтобы изменить фото</div>
+      <div class="settings-hint" data-i18n="avatar_hint">Tap to change photo</div>
     </div>
 
     <div class="settings-field">
-      <label>Имя</label>
-      <input type="text" id="settingsName" maxlength="40" placeholder="Ваше имя">
+      <label data-i18n="field_name">Name</label>
+      <input type="text" id="settingsName" maxlength="40" placeholder="Your name" data-i18n-ph="name_placeholder">
     </div>
 
     <div class="settings-field">
-      <label>Username</label>
+      <label data-i18n="field_username">Username</label>
       <input type="text" id="settingsUsername" maxlength="30" placeholder="username">
     </div>
 
     <div class="settings-field">
-      <label>О себе</label>
-      <textarea id="settingsBio" maxlength="500" rows="3" placeholder="Немного о себе..."></textarea>
+      <label data-i18n="field_bio">About</label>
+      <textarea id="settingsBio" maxlength="500" rows="3" placeholder="A few words about yourself..." data-i18n-ph="bio_placeholder"></textarea>
       <div class="settings-counter"><span id="bioCounter">0</span>/500</div>
     </div>
 
     <div class="settings-field">
-      <label>Дата рождения</label>
+      <label data-i18n="field_birthday">Date of birth</label>
       <input type="date" id="settingsBirthday" max="2013-12-31">
     </div>
 
-    <button class="btn-primary" onclick="saveProfile()">Сохранить</button>
+    <button class="btn-primary" onclick="saveProfile()" data-i18n="btn_save">Save</button>
 
     <div class="settings-divider"></div>
 
-    <div class="settings-section-title">Пароль</div>
+    <div class="settings-section-title" data-i18n="section_language">Language</div>
+    <div class="lang-picker">
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="uk" onclick="setLang('uk')">UK</button>
+      <button data-lang="ru" onclick="setLang('ru')">RU</button>
+      <button data-lang="pl" onclick="setLang('pl')">PL</button>
+      <button data-lang="de" onclick="setLang('de')">DE</button>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <div class="settings-section-title" data-i18n="section_password">Password</div>
 
     <div class="settings-field">
-      <label>Текущий пароль</label>
-      <input type="password" id="settingsCurrentPwd" placeholder="Пусто, если пароля нет">
+      <label data-i18n="field_current_pwd">Current password</label>
+      <input type="password" id="settingsCurrentPwd" placeholder="Empty if no password" data-i18n-ph="current_pwd_placeholder">
     </div>
 
     <div class="settings-field">
-      <label>Новый пароль</label>
-      <input type="password" id="settingsNewPwd" placeholder="Минимум 6 символов">
+      <label data-i18n="field_new_pwd">New password</label>
+      <input type="password" id="settingsNewPwd" placeholder="At least 6 characters" data-i18n-ph="new_pwd_placeholder">
     </div>
 
     <div class="settings-field">
-      <label>Повторите новый пароль</label>
-      <input type="password" id="settingsRepeatPwd" placeholder="Повтор">
+      <label data-i18n="field_repeat_pwd">Repeat new password</label>
+      <input type="password" id="settingsRepeatPwd" placeholder="Repeat" data-i18n-ph="repeat_pwd_placeholder">
     </div>
 
-    <button class="btn-secondary" onclick="changePassword()">Сменить пароль</button>
+    <button class="btn-secondary" onclick="changePassword()" data-i18n="btn_change_pwd">Change password</button>
 
     <div class="settings-divider"></div>
 
     <div class="settings-item" onclick="toggleTheme()">
-      <span>🌙 Тёмная тема</span>
-      <span id="themeValue">Вкл.</span>
+      <span data-i18n="theme_dark">Dark theme</span>
+      <span id="themeValue">On</span>
     </div>
 
     <div class="settings-item" onclick="logout()" style="color:#dc2626">
-      🚪 Выйти
+      <span data-i18n="btn_logout">Log out</span>
     </div>
 
     <div class="settings-footer">
       MINDOFI v1.0 · 2026<br>
-      <a href="privacy.html" target="_blank" style="color:var(--accent);font-size:11px;margin:0 6px">Privacy Policy</a>
-      <a href="terms.html" target="_blank" style="color:var(--accent);font-size:11px;margin:0 6px">Terms of Service</a>
+      <a href="privacy.html" target="_blank" style="color:var(--accent);font-size:11px;margin:0 6px">Privacy</a>
+      <a href="terms.html" target="_blank" style="color:var(--accent);font-size:11px;margin:0 6px">Terms</a>
     </div>
   </div>
 </div>
 
-<!-- ЭКРАН ЗВОНКА -->
+<!-- CALL SCREEN -->
 <div class="call-screen" id="callScreen" style="display:none">
   <video id="remoteVideo" autoplay playsinline></video>
   <video id="localVideo" autoplay muted playsinline></video>
@@ -242,12 +252,12 @@
   <div class="call-info" id="callInfo">
     <div class="call-avatar" id="callAvatar">?</div>
     <div class="call-name" id="callName">—</div>
-    <div class="call-status" id="callStatus">Вызов...</div>
+    <div class="call-status" id="callStatus">Calling...</div>
     <div class="call-timer" id="callTimer" style="display:none">00:00</div>
   </div>
 
   <div class="call-controls">
-    <button class="call-btn" onclick="toggleMute()" id="muteBtn" title="Микрофон">
+    <button class="call-btn" onclick="toggleMute()" id="muteBtn" title="Mic">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
         <path d="M19 10v2a7 7 0 01-14 0v-2"/>
@@ -255,13 +265,13 @@
         <line x1="8" y1="23" x2="16" y2="23"/>
       </svg>
     </button>
-    <button class="call-btn end" onclick="hangUp()" title="Завершить">
+    <button class="call-btn end" onclick="hangUp()" title="End">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.42 19.42 0 01-3.33-2.67m-2.67-3.34a19.79 19.79 0 01-3.07-8.63A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/>
         <line x1="23" y1="1" x2="1" y2="23"/>
       </svg>
     </button>
-    <button class="call-btn" onclick="toggleCam()" id="camBtn" title="Камера">
+    <button class="call-btn" onclick="toggleCam()" id="camBtn" title="Camera">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polygon points="23 7 16 12 23 17 23 7"/>
         <rect x="1" y="5" width="15" height="14" rx="2"/>
@@ -270,19 +280,19 @@
   </div>
 </div>
 
-<!-- ВХОДЯЩИЙ ЗВОНОК -->
+<!-- INCOMING CALL -->
 <div class="incoming-call" id="incomingCall" style="display:none">
   <div class="incoming-content">
     <div class="call-avatar" id="incomingAvatar">?</div>
     <div class="call-name" id="incomingName">—</div>
-    <div class="call-status" id="incomingType">Входящий звонок</div>
+    <div class="call-status" id="incomingType">Incoming call</div>
     <div class="incoming-controls">
-      <button class="call-btn end" onclick="declineCall()">
+      <button class="call-btn end" onclick="declineCall()" title="Decline">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.4 1.13 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6z"/>
         </svg>
       </button>
-      <button class="call-btn accept" onclick="acceptCall()">
+      <button class="call-btn accept" onclick="acceptCall()" title="Accept">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.4 1.13 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6z"/>
         </svg>
@@ -294,6 +304,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="config.js"></script>
-<script src="app.js?v=5"></script>
+<script src="lang.js"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
