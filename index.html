@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="index.css?v=3">
+  <link rel="stylesheet" href="index.css?v=10">
 </head>
 <body>
 
@@ -29,7 +29,6 @@
     <div class="error" id="errBox"></div>
     <div class="success" id="okBox"></div>
 
-    <!-- SCREEN 1: Phone -->
     <div class="screen active" id="screenPhone">
       <div class="phone-row">
         <select class="country-select" id="countrySelect">
@@ -50,7 +49,6 @@
       </div>
     </div>
 
-    <!-- SCREEN 2: OTP -->
     <div class="screen" id="screenOtp">
       <p class="hint" id="otpHint">Code sent to +380...</p>
       <div class="otp-row">
@@ -64,7 +62,6 @@
       <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
     </div>
 
-    <!-- SCREEN 3: Name -->
     <div class="screen" id="screenName">
       <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
         <div class="plus">+</div>
@@ -86,7 +83,7 @@
   </div>
 
   <script src="config.js"></script>
-  <script src="lang.js"></script>
-  <script src="index.js?v=3"></script>
+  <script src="lang.js?v=10"></script>
+  <script src="index.js?v=10"></script>
 </body>
 </html>
