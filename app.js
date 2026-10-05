@@ -1118,3 +1118,45 @@ function playRingtone() {
   };
   playBeep();
 }
+// ============================================================
+//  ПЛЕЕР ГОЛОСОВЫХ
+// ============================================================
+function toggleVoice(id, btn) {
+  const audio = document.getElementById(id);
+  const wave = document.getElementById(id + '_wave');
+  if (!audio) return;
+
+  // Останавливаем другие плееры
+  document.querySelectorAll('audio').forEach(a => {
+    if (a.id !== id && !a.paused) {
+      a.pause();
+      a.currentTime = 0;
+    }
+  });
+
+  if (audio.paused) {
+    audio.play();
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+    // Прогресс
+    audio.ontimeupdate = () => {
+      if (!audio.duration) return;
+      const progress = audio.currentTime / audio.duration;
+      const bars = wave.querySelectorAll('.voice-bar');
+      bars.forEach((b, i) => {
+        const barProgress = i / bars.length;
+        b.style.opacity = barProgress <= progress ? '1' : '0.3';
+        b.style.background = barProgress <= progress ? 'var(--accent)' : 'var(--text-3)';
+      });
+    };
+
+    audio.onended = () => {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      const bars = wave.querySelectorAll('.voice-bar');
+      bars.forEach(b => { b.style.opacity = '0.3'; b.style.background = 'var(--text-3)'; });
+    };
+  } else {
+    audio.pause();
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  }
+}
