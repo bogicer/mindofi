@@ -21,7 +21,6 @@
   .back { display: inline-block; margin-bottom: 20px; color: #1e3a8a; text-decoration: none; font-weight: 600; font-size: 14px; }
   .back:hover { text-decoration: underline; }
   strong { color: #0a0a0a; }
-
   .lang-switch {
     display: flex; flex-wrap: wrap; gap: 6px;
     margin-bottom: 24px; padding: 10px;
@@ -53,6 +52,18 @@
 <div id="content"></div>
 
 <script>
+const CONTACT = {
+  email: "med1asksmain@gmail.com",
+  support: "@admin",
+  address: {
+    en: "Vynnyky, Lviv region, Lychakiv district, Ukraine",
+    uk: "м. Винники, Львівська область, Личаківський район",
+    ru: "г. Винники, Львовская область, Личаковский район",
+    de: "Vynnyky, Region Lwiw, Bezirk Lychakiw, Ukraine",
+    pl: "Wynnyky, obwód lwowski, rejon łyczakowski, Ukraina"
+  }
+};
+
 const T = {
   en: {
     back: "← Back to app",
@@ -68,8 +79,8 @@ const T = {
       { h: "7. Limitation of Liability", b: `<p>The Service is provided <strong>"as is"</strong>. We do not guarantee uninterrupted operation, preservation of all messages, or fitness for specific purposes. We are not liable for losses, actions of other users, or data loss during failures.</p>` },
       { h: "8. Account Suspension", b: `<p>We may block or delete your account for: violations of these Terms, official requests from law enforcement, or suspicious activity.</p>` },
       { h: "9. Changes to Terms", b: `<p>We may change these Terms. Significant changes will be announced in the app.</p>` },
-      { h: "10. Termination", b: `<p>You can delete your account anytime in settings or by emailing support@mindofi.com.</p>` },
-      { h: "11. Contact", b: `<p><strong>Email:</strong> support@mindofi.com</p><p><strong>Address:</strong> [your address or city]</p>` }
+      { h: "10. Termination", b: `<p>You can delete your account anytime in settings, by emailing ${CONTACT.email}, or by messaging ${CONTACT.support} in the app.</p>` },
+      { h: "11. Contact", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p><p><strong>Address:</strong> ${CONTACT.address.en}</p>` }
     ],
     footer: "© 2026 MINDOFI. All rights reserved."
   },
@@ -87,8 +98,8 @@ const T = {
       { h: "7. Обмеження відповідальності", b: `<p>Сервіс надається <strong>«як є»</strong>. Ми не гарантуємо безперебійну роботу, збереження всіх повідомлень чи відповідність конкретним задачам. Не несемо відповідальності за збитки, дії інших користувачів чи втрату даних при збоях.</p>` },
       { h: "8. Блокування акаунта", b: `<p>Ми можемо заблокувати чи видалити акаунт за: порушення цієї Угоди, офіційні запити правоохоронних органів, підозрілу активність.</p>` },
       { h: "9. Зміни умов", b: `<p>Ми можемо змінювати Угоду. Про суттєві зміни повідомимо у додатку.</p>` },
-      { h: "10. Припинення використання", b: `<p>Ви можете видалити акаунт у налаштуваннях або написавши на support@mindofi.com.</p>` },
-      { h: "11. Контакти", b: `<p><strong>Email:</strong> support@mindofi.com</p><p><strong>Адреса:</strong> [ваша адреса або місто]</p>` }
+      { h: "10. Припинення використання", b: `<p>Ви можете видалити акаунт у налаштуваннях, написавши на ${CONTACT.email} або ${CONTACT.support} у додатку.</p>` },
+      { h: "11. Контакти", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p><p><strong>Адреса:</strong> ${CONTACT.address.uk}</p>` }
     ],
     footer: "© 2026 MINDOFI. Усі права захищені."
   },
@@ -106,8 +117,8 @@ const T = {
       { h: "7. Ограничение ответственности", b: `<p>Сервис предоставляется <strong>«как есть»</strong>. Мы не гарантируем бесперебойную работу, сохранение всех сообщений или соответствие конкретным задачам. Не несём ответственности за убытки, действия других пользователей или потерю данных при сбоях.</p>` },
       { h: "8. Блокировка аккаунта", b: `<p>Мы можем заблокировать или удалить аккаунт за: нарушение Соглашения, официальные запросы правоохранительных органов, подозрительную активность.</p>` },
       { h: "9. Изменения условий", b: `<p>Мы можем изменять Соглашение. О существенных изменениях уведомим в приложении.</p>` },
-      { h: "10. Прекращение использования", b: `<p>Вы можете удалить аккаунт в настройках или написав на support@mindofi.com.</p>` },
-      { h: "11. Контакты", b: `<p><strong>Email:</strong> support@mindofi.com</p><p><strong>Адрес:</strong> [ваш адрес или город]</p>` }
+      { h: "10. Прекращение использования", b: `<p>Вы можете удалить аккаунт в настройках, написав на ${CONTACT.email} или ${CONTACT.support} в приложении.</p>` },
+      { h: "11. Контакты", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p><p><strong>Адрес:</strong> ${CONTACT.address.ru}</p>` }
     ],
     footer: "© 2026 MINDOFI. Все права защищены."
   },
@@ -125,8 +136,8 @@ const T = {
       { h: "7. Haftungsbeschränkung", b: `<p>Der Dienst wird <strong>„wie besehen"</strong> bereitgestellt. Wir garantieren weder unterbrechungsfreien Betrieb noch Erhalt aller Nachrichten noch Eignung für bestimmte Zwecke. Wir haften nicht für Verluste, Handlungen anderer Nutzer oder Datenverlust bei Ausfällen.</p>` },
       { h: "8. Kontosperrung", b: `<p>Wir können Ihr Konto sperren oder löschen bei: Verstößen gegen diese Bedingungen, offiziellen Anfragen von Strafverfolgungsbehörden, verdächtiger Aktivität.</p>` },
       { h: "9. Änderungen der Bedingungen", b: `<p>Wir können diese Bedingungen ändern. Wesentliche Änderungen werden in der App angekündigt.</p>` },
-      { h: "10. Beendigung", b: `<p>Sie können Ihr Konto jederzeit in den Einstellungen oder per E-Mail an support@mindofi.com löschen.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>E-Mail:</strong> support@mindofi.com</p><p><strong>Adresse:</strong> [Ihre Adresse oder Stadt]</p>` }
+      { h: "10. Beendigung", b: `<p>Sie können Ihr Konto jederzeit in den Einstellungen, per E-Mail an ${CONTACT.email} oder ${CONTACT.support} in der App löschen.</p>` },
+      { h: "11. Kontakt", b: `<p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p><p><strong>Adresse:</strong> ${CONTACT.address.de}</p>` }
     ],
     footer: "© 2026 MINDOFI. Alle Rechte vorbehalten."
   },
@@ -144,8 +155,8 @@ const T = {
       { h: "7. Ograniczenie odpowiedzialności", b: `<p>Usługa świadczona jest <strong>„tak jak jest"</strong>. Nie gwarantujemy nieprzerwanego działania, zachowania wszystkich wiadomości ani przydatności do konkretnych celów. Nie odpowiadamy za straty, działania innych użytkowników ani utratę danych podczas awarii.</p>` },
       { h: "8. Blokada konta", b: `<p>Możemy zablokować lub usunąć Twoje konto za: naruszenia Regulaminu, oficjalne żądania organów ścigania, podejrzaną aktywność.</p>` },
       { h: "9. Zmiany warunków", b: `<p>Możemy zmieniać Regulamin. O istotnych zmianach poinformujemy w aplikacji.</p>` },
-      { h: "10. Zakończenie korzystania", b: `<p>Możesz usunąć konto w ustawieniach lub pisząc na support@mindofi.com.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>Email:</strong> support@mindofi.com</p><p><strong>Adres:</strong> [Twój adres lub miasto]</p>` }
+      { h: "10. Zakończenie korzystania", b: `<p>Możesz usunąć konto w ustawieniach, pisząc na ${CONTACT.email} lub ${CONTACT.support} w aplikacji.</p>` },
+      { h: "11. Kontakt", b: `<p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p><p><strong>Adres:</strong> ${CONTACT.address.pl}</p>` }
     ],
     footer: "© 2026 MINDOFI. Wszelkie prawa zastrzeżone."
   }
@@ -156,16 +167,11 @@ let LANG = localStorage.getItem('mindofi_legal_lang') || 'en';
 function render() {
   const t = T[LANG] || T.en;
   document.documentElement.lang = LANG;
-
   document.getElementById('backLink').textContent = t.back;
 
   let html = '<h1>' + t.title + '</h1>';
   html += '<p class="date">' + t.date + '</p>';
-
-  t.sections.forEach(s => {
-    html += '<h2>' + s.h + '</h2>' + s.b;
-  });
-
+  t.sections.forEach(s => { html += '<h2>' + s.h + '</h2>' + s.b; });
   html += '<p style="margin-top:40px;color:#718096;font-size:13px;text-align:center">' + t.footer + '</p>';
 
   document.getElementById('content').innerHTML = html;
