@@ -269,24 +269,17 @@ document.getElementById('usernameInput').addEventListener('keydown', e => {
 });
 
 // ============================================================
-//  APPLY TRANSLATIONS ON LOAD + HIGHLIGHT CURRENT LANG
+//  ПРИНУДИТЕЛЬНОЕ ПРИМЕНЕНИЕ ПЕРЕВОДОВ
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  // Применяем переводы
-  if (typeof applyTranslations === 'function') applyTranslations();
-
-  // Подсвечиваем активный язык
-  if (typeof getLang === 'function') {
-    const lang = getLang();
-    document.querySelectorAll('.lang-switch button').forEach(b => {
-      b.classList.toggle('active', b.dataset.lang === lang);
-    });
+function forceApplyTranslations() {
+  if (typeof applyTranslations === 'function') {
+    applyTranslations();
+  } else {
+    setTimeout(forceApplyTranslations, 200);
+    return;
   }
-});
 
-// На случай, если DOMContentLoaded уже прошёл
-if (document.readyState !== 'loading') {
-  if (typeof applyTranslations === 'function') applyTranslations();
+  // Подсветка активного языка
   if (typeof getLang === 'function') {
     const lang = getLang();
     document.querySelectorAll('.lang-switch button').forEach(b => {
@@ -294,3 +287,16 @@ if (document.readyState !== 'loading') {
     });
   }
 }
+
+// Пробуем применить переводы несколько раз — на разных этапах загрузки
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', forceApplyTranslations);
+} else {
+  forceApplyTranslations();
+}
+window.addEventListener('load', forceApplyTranslations);
+setTimeout(forceApplyTranslations, 500);
+setTimeout(forceApplyTranslations, 1500);
+setTimeout(forceApplyTranslations, 3000);
+
+console.log('index.js loaded ✅');
