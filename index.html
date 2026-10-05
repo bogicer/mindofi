@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index.css?v=3">
 </head>
 <body>
 
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Theme"></button>
 
   <div class="lang-top">
-    <div class="lang-switch" id="langSwitch">
-  <button data-lang="en" class="active" onclick="setLang('en')">English</button>
-  <button data-lang="uk" onclick="setLang('uk')">Українська</button>
-  <button data-lang="ru" onclick="setLang('ru')">Руский</button>
-  <button data-lang="pl" onclick="setLang('pl')">Polski</button>
-  <button data-lang="de" onclick="setLang('de')">Deutsch</button>
-</div>
+    <div class="lang-switch">
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+      <button data-lang="uk" onclick="setLang('uk')">UK</button>
+      <button data-lang="ru" onclick="setLang('ru')">RU</button>
+      <button data-lang="pl" onclick="setLang('pl')">PL</button>
+      <button data-lang="de" onclick="setLang('de')">DE</button>
+    </div>
   </div>
 
   <div class="card">
@@ -29,7 +29,7 @@
     <div class="error" id="errBox"></div>
     <div class="success" id="okBox"></div>
 
-    <!-- STEP 1: Phone -->
+    <!-- SCREEN 1: Phone -->
     <div class="screen active" id="screenPhone">
       <div class="phone-row">
         <select class="country-select" id="countrySelect">
@@ -50,7 +50,7 @@
       </div>
     </div>
 
-    <!-- STEP 2: OTP -->
+    <!-- SCREEN 2: OTP -->
     <div class="screen" id="screenOtp">
       <p class="hint" id="otpHint">Code sent to +380...</p>
       <div class="otp-row">
@@ -64,7 +64,7 @@
       <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
     </div>
 
-    <!-- STEP 3: Name / Username / Avatar -->
+    <!-- SCREEN 3: Name -->
     <div class="screen" id="screenName">
       <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
         <div class="plus">+</div>
@@ -87,6 +87,6 @@
 
   <script src="config.js"></script>
   <script src="lang.js"></script>
-  <script src="index.js"></script>
+  <script src="index.js?v=3"></script>
 </body>
 </html>
