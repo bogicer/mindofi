@@ -65,6 +65,13 @@ let visRecording = false;
 
 const playingAudios = new Map();
 
+// Context menu
+let ctxMessageId = null;
+let ctxChatId = null;
+let ctxIsMine = false;
+let ctxMessageText = '';
+let longPressTimer = null;
+
 const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -132,7 +139,6 @@ async function init() {
     });
   });
 
-  // Re-apply translations after init
   if (typeof applyTranslations === 'function') applyTranslations();
 }
 
@@ -206,7 +212,7 @@ let dark = localStorage.getItem('mindofi_dark') === '1';
 function applyTheme() {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   const el = document.getElementById('themeValue');
-  if (el) el.textContent = dark ? t('theme_on') : t('theme_off');
+  if (el && typeof t === 'function') el.textContent = dark ? t('theme_on') : t('theme_off');
 }
 
 function toggleTheme() {
@@ -227,7 +233,7 @@ function renderMe() {
   const mobileAvatar = document.getElementById('mobileProfileAvatar');
 
   meName.textContent = currentUser.name || '—';
-  meStatus.textContent = t('status_online');
+  if (typeof t === 'function') meStatus.textContent = t('status_online');
 
   if (currentUser.photoURL) {
     meAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" alt="">';
@@ -300,9 +306,10 @@ function renderChatList() {
   if (currentTab === 'channels') filtered = [];
 
   if (!filtered.length) {
-    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">' +
-      (chatItems.length === 0 ? t('no_chats') : t('nothing_found')) +
-      '</div>';
+    const msg = chatItems.length === 0
+      ? (typeof t === 'function' ? t('no_chats') : 'No chats')
+      : (typeof t === 'function' ? t('nothing_found') : 'Nothing found');
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">' + msg + '</div>';
     return;
   }
 
@@ -316,13 +323,13 @@ function renderChatList() {
       : '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '">' +
         (item.user.name || '?')[0].toUpperCase() + '</div>';
 
-    let preview = t('no_messages_yet');
+    let preview = (typeof t === 'function' ? t('no_messages_yet') : 'No messages');
     if (item.lastMsg) {
       const typeLabels = {
-        voice: t('preview_voice'),
-        krujok: t('preview_krujok'),
-        image: t('preview_image'),
-        file: t('preview_file')
+        voice: typeof t === 'function' ? t('preview_voice') : '🎤 Voice',
+        krujok: typeof t === 'function' ? t('preview_krujok') : '📹 Video',
+        image: typeof t === 'function' ? t('preview_image') : '📷 Photo',
+        file: typeof t === 'function' ? t('preview_file') : '📎 File'
       };
       preview = typeLabels[item.lastMsg.type] || item.lastMsg.text || '...';
     }
@@ -358,7 +365,9 @@ async function openChat(phone) {
   }
 
   document.getElementById('chatName').textContent = u.name || phone;
-  document.getElementById('chatStatus').textContent = u.online ? t('status_online') : t('status_offline');
+  document.getElementById('chatStatus').textContent = u.online
+    ? (typeof t === 'function' ? t('status_online') : 'Online')
+    : (typeof t === 'function' ? t('status_offline') : 'Offline');
 
   renderChatList();
   await loadMessages(phone);
@@ -401,7 +410,6 @@ async function loadMessages(phone) {
 function renderMessages(phone) {
   const container = document.getElementById('messages');
 
-  // Save playing audio state
   playingAudios.clear();
   container.querySelectorAll('audio').forEach(a => {
     if (!a.paused && a.currentTime > 0) {
@@ -415,14 +423,15 @@ function renderMessages(phone) {
   const msgs = messages[chatId] || [];
 
   if (!msgs.length) {
-    container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">' + t('no_messages_start') + '</div>';
+    const emptyText = typeof t === 'function' ? t('no_messages_start') : 'No messages';
+    container.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">' + emptyText + '</div>';
     return;
   }
 
   msgs.forEach(m => {
     const isOut = m.from === currentUser.phone || m.from_user === currentUser.phone;
-    const el = document.createElement('div');
-    el.className = 'message ' + (isOut ? 'out' : 'in');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message ' + (isOut ? 'out' : 'in');
 
     let content = '';
     if (m.type === 'image' && m.url) {
@@ -450,17 +459,16 @@ function renderMessages(phone) {
       content = escapeHtml(m.text || '');
     }
 
-    el.innerHTML = '<div class="message-bubble">' +
+    wrapper.innerHTML = '<div class="message-bubble">' +
       content +
       '<div class="message-time">' + formatTime(m.timestamp) + '</div>' +
     '</div>';
 
-    container.appendChild(el);
+    container.appendChild(wrapper);
   });
 
   container.scrollTop = container.scrollHeight;
 
-  // Restore playing audio
   playingAudios.forEach((currentTime, id) => {
     const a = document.getElementById(id);
     if (a) {
@@ -504,7 +512,7 @@ async function sendMessage() {
   input.style.height = 'auto';
 
   const res = await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
-  if (!res) toast(t('toast_send_error'));
+  if (!res) toast(typeof t === 'function' ? t('toast_send_error') : 'Failed to send');
 }
 
 // ============================================================
@@ -515,12 +523,12 @@ async function onFilePick(input) {
   if (!file || !activeChat) return;
 
   if (file.size > CONFIG.MAX_FILE_SIZE) {
-    toast(t('toast_file_too_large'));
+    toast(typeof t === 'function' ? t('toast_file_too_large') : 'File too large');
     input.value = '';
     return;
   }
 
-  toast(t('toast_uploading'));
+  toast(typeof t === 'function' ? t('toast_uploading') : 'Uploading...');
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1];
@@ -530,7 +538,10 @@ async function onFilePick(input) {
       type: isImage ? 'image' : 'file'
     });
 
-    if (!res || !res.url) { toast(t('toast_upload_error')); return; }
+    if (!res || !res.url) {
+      toast(typeof t === 'function' ? t('toast_upload_error') : 'Upload failed');
+      return;
+    }
 
     const chatId = getChatId(activeChat);
     const msgId = Date.now() + '_f';
@@ -560,10 +571,7 @@ async function onFilePick(input) {
 // ============================================================
 function bindVoiceButton() {
   const vbtn = document.getElementById('voiceBtn');
-  if (!vbtn) {
-    setTimeout(bindVoiceButton, 500);
-    return;
-  }
+  if (!vbtn) { setTimeout(bindVoiceButton, 500); return; }
   if (vbtn.dataset.bound === '1') return;
   vbtn.dataset.bound = '1';
 
@@ -591,7 +599,7 @@ function bindVoiceButton() {
 
 async function startVoiceRecord(e) {
   if (e && e.preventDefault) e.preventDefault();
-  if (!activeChat) { toast(t('toast_select_chat')); return; }
+  if (!activeChat) { toast(typeof t === 'function' ? t('toast_select_chat') : 'Select a chat'); return; }
   if (visRecording) return;
 
   try {
@@ -612,10 +620,7 @@ async function startVoiceRecord(e) {
     if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime = 'audio/webm;codecs=opus';
     else if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
 
-    vrec = new MediaRecorder(stream, {
-      mimeType: mime,
-      audioBitsPerSecond: 128000
-    });
+    vrec = new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 128000 });
     vrec.ondataavailable = (ev) => { if (ev.data.size > 0) vchunks.push(ev.data); };
     vrec.start(100);
 
@@ -636,7 +641,7 @@ async function startVoiceRecord(e) {
     if (navigator.vibrate) navigator.vibrate(50);
   } catch (err) {
     console.error('Record error:', err);
-    toast(t('toast_no_mic'));
+    toast(typeof t === 'function' ? t('toast_no_mic') : 'No mic');
     visRecording = false;
   }
 }
@@ -660,8 +665,8 @@ async function stopVoiceRecord(cancel) {
 
   if (cancel || vsec < 1) {
     vchunks = [];
-    if (cancel) toast(t('toast_cancelled'));
-    else toast(t('toast_too_short'));
+    if (cancel) toast(typeof t === 'function' ? t('toast_cancelled') : 'Cancelled');
+    else toast(typeof t === 'function' ? t('toast_too_short') : 'Too short');
     return;
   }
 
@@ -669,39 +674,37 @@ async function stopVoiceRecord(cancel) {
   const blob = new Blob(vchunks, { type: rec.mimeType || 'audio/webm' });
   vchunks = [];
 
-  const sizeMB = blob.size / 1024 / 1024;
-  if (sizeMB > 50) { toast(t('toast_file_too_large')); return; }
+  if (blob.size / 1024 / 1024 > 50) {
+    toast(typeof t === 'function' ? t('toast_file_too_large') : 'Too large');
+    return;
+  }
 
-  toast(t('toast_uploading'));
+  toast(typeof t === 'function' ? t('toast_uploading') : 'Uploading...');
 
   const reader = new FileReader();
   reader.onload = async (e) => {
     const base64 = e.target.result.split(',')[1];
     const up = await apiRequest('upload', 'POST', { image: base64, type: 'voice' });
-    if (!up || !up.url) { toast(t('toast_upload_error')); return; }
+    if (!up || !up.url) {
+      toast(typeof t === 'function' ? t('toast_upload_error') : 'Upload failed');
+      return;
+    }
 
     const chatId = getChatId(activeChat);
     const msgId = Date.now() + '_v';
     const dur = Math.floor(vsec / 60) + ':' + String(vsec % 60).padStart(2, '0');
 
     const msg = {
-      id: msgId,
-      chat_id: chatId,
-      from: currentUser.phone,
-      timestamp: Date.now(),
-      type: 'voice',
-      url: up.url,
-      dur: dur,
-      text: ''
+      id: msgId, chat_id: chatId, from: currentUser.phone,
+      timestamp: Date.now(), type: 'voice', url: up.url, dur: dur, text: ''
     };
 
     if (!messages[chatId]) messages[chatId] = [];
     messages[chatId].push(msg);
     renderMessages(activeChat);
-
     await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
     vsec = 0;
-    toast(t('toast_sent'));
+    toast(typeof t === 'function' ? t('toast_sent') : 'Sent ✅');
   };
   reader.readAsDataURL(blob);
 }
@@ -715,10 +718,7 @@ function toggleVoice(id, btn) {
   if (!audio) return;
 
   document.querySelectorAll('audio').forEach(a => {
-    if (a.id !== id && !a.paused) {
-      a.pause();
-      a.currentTime = 0;
-    }
+    if (a.id !== id && !a.paused) { a.pause(); a.currentTime = 0; }
   });
 
   if (audio.paused) {
@@ -752,14 +752,11 @@ function toggleVoice(id, btn) {
 }
 
 // ============================================================
-//  MODALS
+//  MODALS / SIDEBAR
 // ============================================================
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-// ============================================================
-//  SIDEBAR
-// ============================================================
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebarOverlay');
@@ -768,13 +765,12 @@ function toggleSidebar() {
 }
 
 // ============================================================
-//  SEARCH
+//  SEARCH / TABS
 // ============================================================
 async function searchUsers(query) {
   const results = document.getElementById('userSearchResults');
   if (!results) return;
   if (!query || query.length < 2) { results.innerHTML = ''; return; }
-  results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('loading') + '</div>';
 
   const username = query.replace(/^@/, '');
   const phone = await apiRequest('usernames/' + username);
@@ -784,25 +780,19 @@ async function searchUsers(query) {
       (u.username || '').toLowerCase().includes(username.toLowerCase()) ||
       (u.name || '').toLowerCase().includes(username.toLowerCase())
     );
-    if (!found.length) {
-      results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('nothing_found') + '</div>';
-      return;
-    }
+    if (!found.length) { results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + (typeof t === 'function' ? t('nothing_found') : 'Not found') + '</div>'; return; }
     results.innerHTML = '';
     found.forEach(([p, u]) => renderSearchResult(p, u, results));
     return;
   }
 
   if (phone === currentUser.phone) {
-    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('toast_this_is_you') + '</div>';
+    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + (typeof t === 'function' ? t('toast_this_is_you') : 'This is you') + '</div>';
     return;
   }
 
   const u = await apiRequest('users/' + phone);
-  if (!u || !u.name) {
-    results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + t('nothing_found') + '</div>';
-    return;
-  }
+  if (!u || !u.name) { results.innerHTML = '<div style="padding:12px;color:var(--text-3);font-size:13px">' + (typeof t === 'function' ? t('nothing_found') : 'Not found') + '</div>'; return; }
 
   users[phone] = u;
   results.innerHTML = '';
@@ -830,9 +820,6 @@ function renderSearchResult(phone, u, container) {
   container.appendChild(el);
 }
 
-// ============================================================
-//  FILTERS
-// ============================================================
 function filterChats(value) { searchFilter = value; renderChatList(); }
 
 function switchTab(tab) {
@@ -872,9 +859,8 @@ function openSettingsModal() {
     document.getElementById('bioCounter').textContent = bioEl.value.length;
   };
 
-  // Highlight current language
   document.querySelectorAll('.lang-picker button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === getLang());
+    b.classList.toggle('active', b.dataset.lang === (typeof getLang === 'function' ? getLang() : 'en'));
   });
 
   openModal('settingsModal');
@@ -883,7 +869,10 @@ function openSettingsModal() {
 function onSettingsAvatarPick(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { toast(t('toast_avatar_too_large')); return; }
+  if (file.size > 2 * 1024 * 1024) {
+    toast(typeof t === 'function' ? t('toast_avatar_too_large') : 'Avatar up to 2 MB');
+    return;
+  }
 
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -901,24 +890,24 @@ async function saveProfile() {
   const bio = document.getElementById('settingsBio').value.trim();
   const birthday = document.getElementById('settingsBirthday').value;
 
-  if (!name) { toast(t('err_enter_name')); return; }
+  if (!name) {
+    toast(typeof t === 'function' ? t('err_enter_name') : 'Enter name');
+    return;
+  }
 
   if (birthday) {
     const bd = new Date(birthday);
     const now = new Date();
     const age = (now - bd) / (1000 * 60 * 60 * 24 * 365.25);
-    if (age < 13) { toast(t('toast_age_error')); return; }
-    if (age > 120) { toast(t('toast_date_error')); return; }
+    if (age < 13) { toast(typeof t === 'function' ? t('toast_age_error') : 'Age must be 13+'); return; }
+    if (age > 120) { toast(typeof t === 'function' ? t('toast_date_error') : 'Invalid date'); return; }
   }
 
   let newPhotoUrl = currentUser.photoURL;
   if (newAvatarBase64) {
-    const up = await apiRequest('upload', 'POST', {
-      image: newAvatarBase64,
-      type: 'image'
-    });
+    const up = await apiRequest('upload', 'POST', { image: newAvatarBase64, type: 'image' });
     if (up && up.url) newPhotoUrl = up.url;
-    else { toast(t('toast_upload_error')); return; }
+    else { toast(typeof t === 'function' ? t('toast_upload_error') : 'Upload failed'); return; }
   }
 
   const patch = {
@@ -930,7 +919,7 @@ async function saveProfile() {
   };
 
   const res = await apiRequest('users/' + currentUser.phone, 'PATCH', patch);
-  if (!res) { toast(t('error')); return; }
+  if (!res) { toast(typeof t === 'function' ? t('error') : 'Error'); return; }
 
   currentUser.name = name;
   currentUser.username = username ? '@' + username : null;
@@ -940,7 +929,7 @@ async function saveProfile() {
   localStorage.setItem('mindofi_user', JSON.stringify(currentUser));
 
   renderMe();
-  toast(t('toast_profile_saved'));
+  toast(typeof t === 'function' ? t('toast_profile_saved') : 'Profile saved ✅');
   closeModal('settingsModal');
 }
 
@@ -949,16 +938,16 @@ async function changePassword() {
   const nw = document.getElementById('settingsNewPwd').value;
   const rep = document.getElementById('settingsRepeatPwd').value;
 
-  if (nw.length < 6) { toast(t('toast_pwd_short')); return; }
-  if (nw !== rep) { toast(t('toast_wrong_pwd')); return; }
+  if (nw.length < 6) { toast(typeof t === 'function' ? t('toast_pwd_short') : 'Password min 6'); return; }
+  if (nw !== rep) { toast(typeof t === 'function' ? t('toast_wrong_pwd') : 'Passwords mismatch'); return; }
 
   const res = await apiRequest('auth/set-password', 'POST', { current: cur, new: nw });
-  if (!res || !res.success) { toast(res && res.error ? res.error : t('error')); return; }
+  if (!res || !res.success) { toast(res && res.error ? res.error : (typeof t === 'function' ? t('error') : 'Error')); return; }
 
   document.getElementById('settingsCurrentPwd').value = '';
   document.getElementById('settingsNewPwd').value = '';
   document.getElementById('settingsRepeatPwd').value = '';
-  toast(t('toast_password_set'));
+  toast(typeof t === 'function' ? t('toast_password_set') : 'Password set ✅');
 }
 
 // ============================================================
@@ -968,7 +957,6 @@ function startPolling() {
   clearInterval(pollingTimer);
   pollingTimer = setInterval(async () => {
     if (document.hidden) return;
-
     updatePresence(true);
     await loadUsers();
     if (activeChat) await loadMessages(activeChat);
@@ -1040,11 +1028,39 @@ function openProfile() {
 }
 
 // ============================================================
+//  ATTACH REMOTE STREAM (звук в звонках)
+// ============================================================
+function attachRemoteStream() {
+  const rv = document.getElementById('remoteVideo');
+  if (!rv) {
+    console.warn('📞 remoteVideo not found, retry in 200ms');
+    setTimeout(attachRemoteStream, 200);
+    return;
+  }
+
+  if (!remoteStream) {
+    console.warn('📞 remoteStream is empty');
+    return;
+  }
+
+  rv.srcObject = remoteStream;
+  rv.muted = false;
+  rv.volume = 1;
+
+  rv.play().then(() => {
+    console.log('📞 Remote playing ✅');
+  }).catch(err => {
+    console.warn('📞 Play failed:', err);
+    rv.controls = true;
+  });
+}
+
+// ============================================================
 //  CALLS
 // ============================================================
 async function initCall(type) {
-  if (!activeChat) { toast(t('toast_select_chat')); return; }
-  if (pc) { toast(t('call_calling')); return; }
+  if (!activeChat) { toast(typeof t === 'function' ? t('toast_select_chat') : 'Select chat'); return; }
+  if (pc) { toast(typeof t === 'function' ? t('call_calling') : 'In call'); return; }
 
   callType = type;
   callRole = 'caller';
@@ -1057,7 +1073,7 @@ async function initCall(type) {
       : { audio: true, video: false };
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    toast(t('toast_no_mic'));
+    toast(typeof t === 'function' ? t('toast_no_mic') : 'No mic');
     return;
   }
 
@@ -1072,12 +1088,11 @@ async function initCall(type) {
     localVideo.style.display = 'none';
   }
 
-  const remoteVideo = document.getElementById('remoteVideo');
   pc.ontrack = (event) => {
+    console.log('📞 Track received:', event.track.kind);
     if (event.streams && event.streams[0]) {
       remoteStream = event.streams[0];
-      remoteVideo.srcObject = remoteStream;
-      remoteVideo.play().catch(() => {});
+      attachRemoteStream();
     }
   };
 
@@ -1109,7 +1124,7 @@ async function initCall(type) {
     tries++;
     if (tries > 40) {
       clearInterval(callPollInterval);
-      toast(t('call_no_answer'));
+      toast(typeof t === 'function' ? t('call_no_answer') : 'No answer');
       hangUp();
       return;
     }
@@ -1117,7 +1132,7 @@ async function initCall(type) {
     if (!callData) return;
     if (callData.status === 'declined') {
       clearInterval(callPollInterval);
-      toast(t('call_declined'));
+      toast(typeof t === 'function' ? t('call_declined') : 'Declined');
       hangUp();
       return;
     }
@@ -1134,6 +1149,9 @@ async function initCall(type) {
         startCallTimer();
         document.getElementById('callStatus').style.display = 'none';
         document.getElementById('callTimer').style.display = 'block';
+
+        // Fallback на случай если ontrack пришёл раньше
+        if (remoteStream) attachRemoteStream();
       } catch (e) { console.error(e); }
     }
   }, 1000);
@@ -1154,7 +1172,7 @@ async function acceptCall() {
       : { audio: true, video: false };
     localStream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    toast(t('toast_no_mic'));
+    toast(typeof t === 'function' ? t('toast_no_mic') : 'No mic');
     await apiRequest('calls/' + callId, 'PATCH', { status: 'declined' });
     resetCall();
     return;
@@ -1171,12 +1189,11 @@ async function acceptCall() {
     localVideo.style.display = 'none';
   }
 
-  const remoteVideo = document.getElementById('remoteVideo');
   pc.ontrack = (event) => {
+    console.log('📞 Track received:', event.track.kind);
     if (event.streams && event.streams[0]) {
       remoteStream = event.streams[0];
-      remoteVideo.srcObject = remoteStream;
-      remoteVideo.play().catch(() => {});
+      attachRemoteStream();
     }
   };
 
@@ -1209,6 +1226,9 @@ async function acceptCall() {
     document.getElementById('callStatus').style.display = 'none';
     document.getElementById('callTimer').style.display = 'block';
 
+    // Fallback
+    if (remoteStream) attachRemoteStream();
+
     const icePoll = setInterval(async () => {
       if (!pc) { clearInterval(icePoll); return; }
       const c = await apiRequest('ice/' + callId);
@@ -1217,10 +1237,13 @@ async function acceptCall() {
           try { await pc.addIceCandidate(new RTCIceCandidate(c[cid])); } catch (e) {}
         }
       }
+      // Пробуем ещё раз привязать стрим если не привязался
+      const rv = document.getElementById('remoteVideo');
+      if (rv && !rv.srcObject && remoteStream) attachRemoteStream();
     }, 1500);
   } catch (e) {
     console.error(e);
-    toast(t('error'));
+    toast(typeof t === 'function' ? t('error') : 'Error');
     hangUp();
   }
 
@@ -1248,7 +1271,7 @@ async function hangUp() {
 
   const rv = document.getElementById('remoteVideo');
   const lv = document.getElementById('localVideo');
-  if (rv) rv.srcObject = null;
+  if (rv) { rv.srcObject = null; rv.controls = false; rv.muted = false; }
   if (lv) { lv.srcObject = null; lv.style.display = 'none'; }
 
   if (callId) await apiRequest('calls/' + callId, 'DELETE');
@@ -1287,7 +1310,9 @@ function showCallScreen(type, role, user) {
   }
 
   callName.textContent = user ? user.name : callTarget;
-  callStatus.textContent = role === 'caller' ? t('call_calling') : t('call_connecting');
+  callStatus.textContent = role === 'caller'
+    ? (typeof t === 'function' ? t('call_calling') : 'Calling...')
+    : (typeof t === 'function' ? t('call_connecting') : 'Connecting...');
   callStatus.style.display = 'block';
   callTimer.style.display = 'none';
   callTimer.textContent = '00:00';
@@ -1352,7 +1377,9 @@ function showIncoming(callData) {
   }
 
   name.textContent = caller ? caller.name : callData.caller;
-  type.textContent = callData.call_type === 'video' ? '📹 ' + t('call_video') : '📞 ' + t('call_voice');
+  type.textContent = callData.call_type === 'video'
+    ? '📹 ' + (typeof t === 'function' ? t('call_video') : 'Video')
+    : '📞 ' + (typeof t === 'function' ? t('call_voice') : 'Voice');
 
   document.getElementById('incomingCall').style.display = 'flex';
   try { playRingtone(); } catch (e) {}
