@@ -1,11 +1,11 @@
 // ============================================================
-//  MINDOFI — Локализация (i18n)
-//  Все тексты приложения в одном файле
+//  MINDOFI — Localization (i18n)
+//  All app texts in one file
 // ============================================================
 
 const LANGS = {
   en: {
-    // Общее
+    // === Common ===
     app_name: "MINDOFI",
     loading: "Loading...",
     error: "Error",
@@ -17,7 +17,33 @@ const LANGS = {
     no: "No",
     ok: "OK",
 
-    // Сайдбар
+    // === Login page ===
+    subtitle: "Secure Messenger",
+    phone_placeholder: "50 123 45 67",
+    btn_continue: "Continue",
+    btn_confirm: "Confirm",
+    btn_create_account: "Create account",
+    link_register: "No account? Sign up",
+    link_login: "Already have an account? Sign in",
+    link_back: "← Back",
+    avatar_label: "Photo",
+    name_placeholder: "Your name",
+    username_placeholder: "@username (optional)",
+    otp_sent_to: "Code sent to +",
+    err_fill_both: "Fill in both fields",
+    err_fill_phone: "Enter your phone number",
+    err_wrong_code: "Wrong code",
+    err_enter_5_digits: "Enter 5 digits",
+    err_enter_name: "Enter your name",
+    err_no_server: "Cannot connect to server",
+    err_sms_failed: "Failed to send SMS. Try again later",
+    err_avatar_large: "Avatar must be under 2 MB",
+    ok_login_done: "Login successful!",
+    ok_account_created: "Account created!",
+    ok_sms_sent: "SMS sent to +",
+    test_code: "🧪 TEST CODE: ",
+
+    // === Sidebar ===
     search: "Search...",
     tab_all: "All",
     tab_groups: "Groups",
@@ -25,11 +51,11 @@ const LANGS = {
     status_online: "Online",
     status_offline: "Offline",
 
-    // Пустое состояние
+    // === Empty state ===
     empty_title: "MINDOFI",
     empty_text: "Select a chat on the left or create a new one",
 
-    // Список чатов
+    // === Chat list ===
     no_chats: "No chats yet. Tap + to start.",
     nothing_found: "Nothing found",
     no_messages_yet: "No messages",
@@ -38,23 +64,21 @@ const LANGS = {
     preview_image: "📷 Photo",
     preview_file: "📎 File",
 
-    // Чат
+    // === Chat ===
     message_placeholder: "Message...",
     no_messages_start: "No messages. Start chatting!",
 
-    // Профиль
+    // === Profile ===
     profile: "Profile",
     avatar_hint: "Tap to change photo",
     field_name: "Name",
-    name_placeholder: "Your name",
     field_username: "Username",
-    username_placeholder: "username",
     field_bio: "About",
     bio_placeholder: "A few words about yourself...",
     field_birthday: "Date of birth",
     btn_save: "Save",
 
-    // Пароль
+    // === Password ===
     section_password: "Password",
     field_current_pwd: "Current password",
     current_pwd_placeholder: "Empty if no password",
@@ -64,27 +88,22 @@ const LANGS = {
     repeat_pwd_placeholder: "Repeat",
     btn_change_pwd: "Change password",
 
-    // Язык
+    // === Language ===
     section_language: "Language",
-    language_en: "🇬🇧 English",
-    language_uk: "🇺🇦 Українська",
-    language_ru: "🇷🇺 Русский",
-    language_pl: "🇵🇱 Polski",
-    language_de: "🇩🇪 Deutsch",
 
-    // Тема
+    // === Theme ===
     theme_dark: "Dark theme",
     theme_on: "On",
     theme_off: "Off",
 
-    // Выход
+    // === Logout ===
     btn_logout: "Log out",
 
-    // Запись голосового
+    // === Voice recording ===
     recording: "Recording",
     rec_hint: "Release to send",
 
-    // Звонки
+    // === Calls ===
     call_voice: "Voice call",
     call_video: "Video call",
     call_calling: "Calling...",
@@ -97,7 +116,7 @@ const LANGS = {
     call_declined: "Declined",
     call_ended: "Call ended",
 
-    // Ошибки / уведомления
+    // === Toasts ===
     toast_select_chat: "Select a chat",
     toast_no_mic: "No microphone access",
     toast_too_short: "Too short",
@@ -118,8 +137,16 @@ const LANGS = {
     toast_wrong_pwd: "Passwords don't match",
     toast_pwd_short: "Password must be at least 6 characters",
     toast_loading: "Loading...",
+    toast_copied: "Copied",
+    toast_deleted: "Deleted",
+    confirm_delete: "Delete this message?",
 
-    // Кнопки и подсказки
+    // === Context menu ===
+    ctx_reply: "Reply",
+    ctx_copy: "Copy",
+    ctx_delete: "Delete",
+
+    // === Buttons / tooltips ===
     btn_attach: "Attach file",
     btn_voice: "Hold to record",
     btn_send: "Send",
@@ -142,6 +169,31 @@ const LANGS = {
     yes: "Так",
     no: "Ні",
     ok: "ОК",
+
+    subtitle: "Захищений месенджер",
+    phone_placeholder: "50 123 45 67",
+    btn_continue: "Продовжити",
+    btn_confirm: "Підтвердити",
+    btn_create_account: "Створити акаунт",
+    link_register: "Немає акаунта? Зареєструватися",
+    link_login: "Вже є акаунт? Увійти",
+    link_back: "← Назад",
+    avatar_label: "Фото",
+    name_placeholder: "Ваше ім'я",
+    username_placeholder: "@username (необов'язково)",
+    otp_sent_to: "Код відправлено на +",
+    err_fill_both: "Заповніть обидва поля",
+    err_fill_phone: "Введіть номер телефону",
+    err_wrong_code: "Невірний код",
+    err_enter_5_digits: "Введіть 5 цифр",
+    err_enter_name: "Введіть ім'я",
+    err_no_server: "Не вдається підключитися до сервера",
+    err_sms_failed: "Не вдалося надіслати SMS. Спробуйте пізніше",
+    err_avatar_large: "Аватар до 2 МБ",
+    ok_login_done: "Вхід виконано!",
+    ok_account_created: "Акаунт створено!",
+    ok_sms_sent: "SMS надіслано на +",
+    test_code: "🧪 ТЕСТОВИЙ КОД: ",
 
     search: "Пошук...",
     tab_all: "Усі",
@@ -167,9 +219,7 @@ const LANGS = {
     profile: "Профіль",
     avatar_hint: "Натисніть, щоб змінити фото",
     field_name: "Ім'я",
-    name_placeholder: "Ваше ім'я",
     field_username: "Username",
-    username_placeholder: "username",
     field_bio: "Про себе",
     bio_placeholder: "Трохи про себе...",
     field_birthday: "Дата народження",
@@ -185,18 +235,10 @@ const LANGS = {
     btn_change_pwd: "Змінити пароль",
 
     section_language: "Мова",
-    language_en: "🇬🇧 English",
-    language_uk: "🇺🇦 Українська",
-    language_ru: "🇷🇺 Русский",
-    language_pl: "🇵🇱 Polski",
-    language_de: "🇩🇪 Deutsch",
-
     theme_dark: "Темна тема",
     theme_on: "Увімк.",
     theme_off: "Вимк.",
-
     btn_logout: "Вийти",
-
     recording: "Запис",
     rec_hint: "Відпустіть, щоб надіслати",
 
@@ -232,6 +274,13 @@ const LANGS = {
     toast_wrong_pwd: "Паролі не співпадають",
     toast_pwd_short: "Пароль мінімум 6 символів",
     toast_loading: "Завантаження...",
+    toast_copied: "Скопійовано",
+    toast_deleted: "Видалено",
+    confirm_delete: "Видалити це повідомлення?",
+
+    ctx_reply: "Відповісти",
+    ctx_copy: "Копіювати",
+    ctx_delete: "Видалити",
 
     btn_attach: "Прикріпити файл",
     btn_voice: "Утримуйте для запису",
@@ -255,6 +304,31 @@ const LANGS = {
     yes: "Да",
     no: "Нет",
     ok: "ОК",
+
+    subtitle: "Безопасный мессенджер",
+    phone_placeholder: "50 123 45 67",
+    btn_continue: "Продолжить",
+    btn_confirm: "Подтвердить",
+    btn_create_account: "Создать аккаунт",
+    link_register: "Нет аккаунта? Зарегистрироваться",
+    link_login: "Уже есть аккаунт? Войти",
+    link_back: "← Назад",
+    avatar_label: "Фото",
+    name_placeholder: "Ваше имя",
+    username_placeholder: "@username (необязательно)",
+    otp_sent_to: "Код отправлен на +",
+    err_fill_both: "Заполните оба поля",
+    err_fill_phone: "Введите номер телефона",
+    err_wrong_code: "Неверный код",
+    err_enter_5_digits: "Введите 5 цифр",
+    err_enter_name: "Введите имя",
+    err_no_server: "Не удаётся подключиться к серверу",
+    err_sms_failed: "Не удалось отправить SMS. Попробуйте позже",
+    err_avatar_large: "Аватар до 2 МБ",
+    ok_login_done: "Вход выполнен!",
+    ok_account_created: "Аккаунт создан!",
+    ok_sms_sent: "SMS отправлена на +",
+    test_code: "🧪 ТЕСТОВЫЙ КОД: ",
 
     search: "Поиск...",
     tab_all: "Все",
@@ -280,9 +354,7 @@ const LANGS = {
     profile: "Профиль",
     avatar_hint: "Нажмите, чтобы изменить фото",
     field_name: "Имя",
-    name_placeholder: "Ваше имя",
     field_username: "Username",
-    username_placeholder: "username",
     field_bio: "О себе",
     bio_placeholder: "Немного о себе...",
     field_birthday: "Дата рождения",
@@ -298,18 +370,10 @@ const LANGS = {
     btn_change_pwd: "Сменить пароль",
 
     section_language: "Язык",
-    language_en: "🇬🇧 English",
-    language_uk: "🇺🇦 Українська",
-    language_ru: "🇷🇺 Русский",
-    language_pl: "🇵🇱 Polski",
-    language_de: "🇩🇪 Deutsch",
-
     theme_dark: "Тёмная тема",
     theme_on: "Вкл.",
     theme_off: "Выкл.",
-
     btn_logout: "Выйти",
-
     recording: "Запись",
     rec_hint: "Отпустите, чтобы отправить",
 
@@ -345,6 +409,13 @@ const LANGS = {
     toast_wrong_pwd: "Пароли не совпадают",
     toast_pwd_short: "Пароль минимум 6 символов",
     toast_loading: "Загрузка...",
+    toast_copied: "Скопировано",
+    toast_deleted: "Удалено",
+    confirm_delete: "Удалить это сообщение?",
+
+    ctx_reply: "Ответить",
+    ctx_copy: "Копировать",
+    ctx_delete: "Удалить",
 
     btn_attach: "Прикрепить файл",
     btn_voice: "Удерживайте для записи",
@@ -368,6 +439,31 @@ const LANGS = {
     yes: "Tak",
     no: "Nie",
     ok: "OK",
+
+    subtitle: "Bezpieczny komunikator",
+    phone_placeholder: "50 123 45 67",
+    btn_continue: "Kontynuuj",
+    btn_confirm: "Potwierdź",
+    btn_create_account: "Utwórz konto",
+    link_register: "Nie masz konta? Zarejestruj się",
+    link_login: "Masz konto? Zaloguj się",
+    link_back: "← Wstecz",
+    avatar_label: "Zdjęcie",
+    name_placeholder: "Twoje imię",
+    username_placeholder: "@username (opcjonalnie)",
+    otp_sent_to: "Kod wysłany na +",
+    err_fill_both: "Wypełnij oba pola",
+    err_fill_phone: "Wprowadź numer telefonu",
+    err_wrong_code: "Nieprawidłowy kod",
+    err_enter_5_digits: "Wprowadź 5 cyfr",
+    err_enter_name: "Wprowadź imię",
+    err_no_server: "Nie można połączyć się z serwerem",
+    err_sms_failed: "Nie udało się wysłać SMS",
+    err_avatar_large: "Avatar do 2 MB",
+    ok_login_done: "Zalogowano!",
+    ok_account_created: "Konto utworzone!",
+    ok_sms_sent: "SMS wysłano na +",
+    test_code: "🧪 KOD TESTOWY: ",
 
     search: "Szukaj...",
     tab_all: "Wszystkie",
@@ -393,9 +489,7 @@ const LANGS = {
     profile: "Profil",
     avatar_hint: "Naciśnij, aby zmienić zdjęcie",
     field_name: "Imię",
-    name_placeholder: "Twoje imię",
     field_username: "Username",
-    username_placeholder: "username",
     field_bio: "O sobie",
     bio_placeholder: "Kilka słów o sobie...",
     field_birthday: "Data urodzenia",
@@ -411,18 +505,10 @@ const LANGS = {
     btn_change_pwd: "Zmień hasło",
 
     section_language: "Język",
-    language_en: "🇬🇧 English",
-    language_uk: "🇺🇦 Українська",
-    language_ru: "🇷🇺 Русский",
-    language_pl: "🇵🇱 Polski",
-    language_de: "🇩🇪 Deutsch",
-
     theme_dark: "Ciemny motyw",
     theme_on: "Wł.",
     theme_off: "Wył.",
-
     btn_logout: "Wyloguj",
-
     recording: "Nagrywanie",
     rec_hint: "Puść, aby wysłać",
 
@@ -458,6 +544,13 @@ const LANGS = {
     toast_wrong_pwd: "Hasła nie pasują",
     toast_pwd_short: "Hasło min. 6 znaków",
     toast_loading: "Ładowanie...",
+    toast_copied: "Skopiowano",
+    toast_deleted: "Usunięto",
+    confirm_delete: "Usunąć tę wiadomość?",
+
+    ctx_reply: "Odpowiedz",
+    ctx_copy: "Kopiuj",
+    ctx_delete: "Usuń",
 
     btn_attach: "Załącz plik",
     btn_voice: "Przytrzymaj aby nagrać",
@@ -481,6 +574,31 @@ const LANGS = {
     yes: "Ja",
     no: "Nein",
     ok: "OK",
+
+    subtitle: "Sicherer Messenger",
+    phone_placeholder: "50 123 45 67",
+    btn_continue: "Weiter",
+    btn_confirm: "Bestätigen",
+    btn_create_account: "Konto erstellen",
+    link_register: "Kein Konto? Registrieren",
+    link_login: "Bereits ein Konto? Anmelden",
+    link_back: "← Zurück",
+    avatar_label: "Foto",
+    name_placeholder: "Ihr Name",
+    username_placeholder: "@username (optional)",
+    otp_sent_to: "Code gesendet an +",
+    err_fill_both: "Füllen Sie beide Felder aus",
+    err_fill_phone: "Telefonnummer eingeben",
+    err_wrong_code: "Falscher Code",
+    err_enter_5_digits: "Geben Sie 5 Ziffern ein",
+    err_enter_name: "Namen eingeben",
+    err_no_server: "Verbindung zum Server nicht möglich",
+    err_sms_failed: "SMS konnte nicht gesendet werden",
+    err_avatar_large: "Avatar bis 2 MB",
+    ok_login_done: "Anmeldung erfolgreich!",
+    ok_account_created: "Konto erstellt!",
+    ok_sms_sent: "SMS gesendet an +",
+    test_code: "🧪 TESTCODE: ",
 
     search: "Suchen...",
     tab_all: "Alle",
@@ -506,9 +624,7 @@ const LANGS = {
     profile: "Profil",
     avatar_hint: "Tippen zum Ändern des Fotos",
     field_name: "Name",
-    name_placeholder: "Ihr Name",
     field_username: "Username",
-    username_placeholder: "username",
     field_bio: "Über mich",
     bio_placeholder: "Ein paar Worte über Sie...",
     field_birthday: "Geburtsdatum",
@@ -524,18 +640,10 @@ const LANGS = {
     btn_change_pwd: "Passwort ändern",
 
     section_language: "Sprache",
-    language_en: "🇬🇧 English",
-    language_uk: "🇺🇦 Українська",
-    language_ru: "🇷🇺 Русский",
-    language_pl: "🇵🇱 Polski",
-    language_de: "🇩🇪 Deutsch",
-
     theme_dark: "Dunkles Design",
     theme_on: "Ein",
     theme_off: "Aus",
-
     btn_logout: "Abmelden",
-
     recording: "Aufnahme",
     rec_hint: "Loslassen zum Senden",
 
@@ -571,6 +679,13 @@ const LANGS = {
     toast_wrong_pwd: "Passwörter stimmen nicht überein",
     toast_pwd_short: "Passwort mindestens 6 Zeichen",
     toast_loading: "Wird geladen...",
+    toast_copied: "Kopiert",
+    toast_deleted: "Gelöscht",
+    confirm_delete: "Diese Nachricht löschen?",
+
+    ctx_reply: "Antworten",
+    ctx_copy: "Kopieren",
+    ctx_delete: "Löschen",
 
     btn_attach: "Datei anhängen",
     btn_voice: "Halten zum Aufnehmen",
@@ -585,7 +700,7 @@ const LANGS = {
 };
 
 // ============================================================
-//  ТЕКУЩИЙ ЯЗЫК
+//  CURRENT LANGUAGE
 // ============================================================
 let CURRENT_LANG = localStorage.getItem('mindofi_lang') || 'en';
 
@@ -599,7 +714,6 @@ function setLang(code) {
   CURRENT_LANG = code;
   localStorage.setItem('mindofi_lang', code);
   applyTranslations();
-  // Обновляем активный класс на кнопках языка
   document.querySelectorAll('[data-lang]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === code);
   });
@@ -610,37 +724,38 @@ function getLang() {
 }
 
 // ============================================================
-//  АВТО-ПРИМЕНЕНИЕ ПЕРЕВОДОВ
-//  Ищем data-i18n и заменяем текст
-//  Ищем data-i18n-ph и заменяем placeholder
-//  Ищем data-i18n-title и заменяем title
+//  APPLY TRANSLATIONS
 // ============================================================
 function applyTranslations() {
-  // Текстовое содержимое
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     el.textContent = t(key);
   });
 
-  // Placeholders
   document.querySelectorAll('[data-i18n-ph]').forEach(el => {
     const key = el.dataset.i18nPh;
     el.placeholder = t(key);
   });
 
-  // Title (подсказки)
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
     const key = el.dataset.i18nTitle;
     el.title = t(key);
   });
 
-  // Обновляем <html lang="...">
   document.documentElement.lang = CURRENT_LANG;
 }
 
-// Автозапуск при загрузке
+// Auto-apply on load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', applyTranslations);
 } else {
   applyTranslations();
 }
+
+// Auto-bind [data-lang] buttons
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lang]');
+  if (btn && btn.dataset.lang) {
+    setLang(btn.dataset.lang);
+  }
+});
