@@ -1,10 +1,12 @@
 // ============================================================
 //  MINDOFI — Логика страницы логина/регистрации
+//  ТЕСТОВЫЙ РЕЖИМ: OTP показывается в интерфейсе
 // ============================================================
 
-let currentMode = 'login';   // 'login' | 'register'
-let otpPhone = '';           // номер в формате 380XXXXXXXXX
-let avatarData = null;       // base64 аватарки
+let currentMode = 'login';
+let otpPhone = '';
+let otpCode = '';          // тестовый код из ответа сервера
+let avatarData = null;
 
 // ============================================================
 //  ТЕМА
@@ -58,7 +60,7 @@ function showSuccess(msg) {
   const el = document.getElementById('okBox');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 5000);
+  setTimeout(() => el.classList.remove('show'), 8000);
 }
 
 // ============================================================
@@ -98,7 +100,7 @@ async function sendOtp() {
 
   const btn = document.getElementById('phoneBtn');
   btn.disabled = true;
-  btn.textContent = 'Отправка SMS...';
+  btn.textContent = 'Отправка...';
 
   const res = await apiPost('auth/otp', { phone: otpPhone });
 
@@ -106,13 +108,21 @@ async function sendOtp() {
   btn.textContent = 'Продолжить';
 
   if (!res.success) {
-    showError(res.error || 'Ошибка отправки SMS');
+    showError(res.error || 'Ошибка отправки кода');
     return;
   }
 
-  // SMS отправлена через TurboSMS
+  // ТЕСТОВЫЙ РЕЖИМ: код приходит в ответе сервера
+  otpCode = res.otp || '';
   document.getElementById('otpHint').textContent = 'Код отправлен на +' + otpPhone;
-  showSuccess('SMS отправлена на +' + otpPhone);
+
+  if (otpCode) {
+    showSuccess('🧪 ТЕСТОВЫЙ КОД: ' + otpCode);
+    console.log(
+      '%c🧪 OTP: ' + otpCode,
+      'background:#1e3a8a;color:#fff;padding:10px 16px;border-radius:8px;font-size:20px;font-weight:bold;'
+    );
+  }
 
   showScreen('Otp');
   setTimeout(() => document.getElementById('o1').focus(), 100);
@@ -145,7 +155,6 @@ function getOtpValue() {
 
 // ============================================================
 //  ШАГ 2: ПРОВЕРКА OTP
-//  Код проверяет сервер! Локальной проверки больше нет.
 // ============================================================
 async function verifyOtp() {
   const code = getOtpValue();
@@ -155,17 +164,21 @@ async function verifyOtp() {
     return;
   }
 
+  // Тестовая проверка — код должен совпасть с тем, что вернул сервер
+  if (otpCode && code !== otpCode) {
+    showError('Неверный код');
+    for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
+    document.getElementById('o1').focus();
+    return;
+  }
+
   if (currentMode === 'register') {
-    // На регистрацию — код проверит сервер в doRegister
     showScreen('Name');
     setTimeout(() => document.getElementById('nameInput').focus(), 100);
     return;
   }
 
   // ЛОГИН
-  const btn = event && event.target;
-  showSuccess('Проверка...');
-
   const res = await apiPost('auth/login', { phone: otpPhone, otp: code });
 
   if (res.success) {
@@ -179,9 +192,6 @@ async function verifyOtp() {
     }, 600);
   } else {
     showError(res.error || 'Ошибка входа');
-    // Очищаем поля OTP при неверном коде
-    for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
-    document.getElementById('o1').focus();
   }
 }
 
@@ -192,7 +202,6 @@ function onAvatarPick(input) {
   const file = input.files[0];
   if (!file) return;
 
-  // Проверка размера — 2 МБ для аватарки
   if (file.size > 2 * 1024 * 1024) {
     showError('Аватар должен быть до 2 МБ');
     return;
