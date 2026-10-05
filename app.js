@@ -9,7 +9,6 @@ function updateAppHeight() {
   const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   document.documentElement.style.setProperty('--app-height', vh + 'px');
 }
-
 updateAppHeight();
 
 if (window.visualViewport) {
@@ -24,9 +23,7 @@ document.addEventListener('focusin', (e) => {
     setTimeout(updateAppHeight, 300);
   }
 });
-document.addEventListener('focusout', () => {
-  setTimeout(updateAppHeight, 300);
-});
+document.addEventListener('focusout', () => setTimeout(updateAppHeight, 300));
 
 // ============================================================
 //  СОСТОЯНИЕ
@@ -58,6 +55,13 @@ let muteOn = false;
 let camOff = false;
 let watchInterval = null;
 let ringtoneCtx = null;
+
+// Голосовые
+let vrec = null;
+let vchunks = [];
+let vsec = 0;
+let vtimer = null;
+let visRecording = false;
 
 const ICE_CONFIG = {
   iceServers: [
@@ -105,6 +109,8 @@ async function init() {
   startCallWatcher();
 
   updateAppHeight();
+  bindVoiceButton();
+  bindTextarea();
 
   window.addEventListener('beforeunload', () => {
     updatePresence(false);
@@ -118,25 +124,29 @@ async function init() {
     updateAppHeight();
   });
 
-  const ta = document.getElementById('messageInput');
-  if (ta) {
-    ta.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
-      updateAppHeight();
-    });
-    ta.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-  }
-
   document.querySelectorAll('.modal').forEach(m => {
     m.addEventListener('click', (e) => {
       if (e.target === m) m.style.display = 'none';
     });
+  });
+}
+
+function bindTextarea() {
+  const ta = document.getElementById('messageInput');
+  if (!ta) { setTimeout(bindTextarea, 500); return; }
+  if (ta.dataset.bound === '1') return;
+  ta.dataset.bound = '1';
+
+  ta.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+    updateAppHeight();
+  });
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   });
 }
 
@@ -393,7 +403,19 @@ function renderMessages(phone) {
     if (m.type === 'image' && m.url) {
       content = '<div class="message-image" onclick="openImage(\'' + m.url + '\')"><img src="' + m.url + '" loading="lazy"></div>';
     } else if (m.type === 'voice' && m.url) {
-      content = '<audio controls src="' + m.url + '" style="max-width:220px"></audio>';
+      const voiceId = 'voice_' + m.id;
+      let bars = '';
+      for (let i = 0; i < 24; i++) {
+        bars += '<div class="voice-bar" style="height:' + (3 + Math.abs(Math.sin(i * 0.7)) * 17) + 'px"></div>';
+      }
+      content = '<div class="voice-msg">' +
+        '<button class="voice-play" onclick="toggleVoice(\'' + voiceId + '\', this)">' +
+          '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+        '</button>' +
+        '<div class="voice-wave" id="' + voiceId + '_wave">' + bars + '</div>' +
+        '<audio id="' + voiceId + '" src="' + m.url + '" preload="metadata"></audio>' +
+        '<span class="voice-dur">' + (m.dur || '0:00') + '</span>' +
+      '</div>';
     } else if (m.type === 'krujok' && m.url) {
       content = '<video controls src="' + m.url + '" style="max-width:220px;border-radius:12px"></video>';
     } else if (m.type === 'file' && m.url) {
@@ -491,6 +513,194 @@ async function onFilePick(input) {
   };
   reader.readAsDataURL(file);
   input.value = '';
+}
+
+// ============================================================
+//  ГОЛОСОВЫЕ СООБЩЕНИЯ
+// ============================================================
+function bindVoiceButton() {
+  const vbtn = document.getElementById('voiceBtn');
+  if (!vbtn) {
+    setTimeout(bindVoiceButton, 500);
+    return;
+  }
+  if (vbtn.dataset.bound === '1') return;
+  vbtn.dataset.bound = '1';
+
+  console.log('voiceBtn привязана ✅');
+
+  vbtn.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Desktop
+  vbtn.addEventListener('mousedown', startVoiceRecord);
+  vbtn.addEventListener('mouseup', () => stopVoiceRecord(false));
+  vbtn.addEventListener('mouseleave', () => { if (visRecording) stopVoiceRecord(true); });
+
+  // Mobile
+  vbtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startVoiceRecord(e);
+  }, { passive: false });
+
+  vbtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    stopVoiceRecord(false);
+  }, { passive: false });
+
+  vbtn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    stopVoiceRecord(true);
+  }, { passive: false });
+}
+
+async function startVoiceRecord(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (!activeChat) { toast('Выберите чат'); return; }
+  if (visRecording) return;
+
+  console.log('startVoiceRecord: запрос микрофона...');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    vchunks = [];
+    vsec = 0;
+    visRecording = true;
+
+    let mime = 'audio/webm';
+    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime = 'audio/webm;codecs=opus';
+    else if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
+
+    vrec = new MediaRecorder(stream, { mimeType: mime });
+    vrec.ondataavailable = (ev) => { if (ev.data.size > 0) vchunks.push(ev.data); };
+    vrec.start(100);
+
+    const bar = document.getElementById('recordingBar');
+    const timer = document.getElementById('recordingTimer');
+    if (bar) bar.style.display = 'flex';
+    const btn = document.getElementById('voiceBtn');
+    if (btn) btn.classList.add('recording');
+
+    vtimer = setInterval(() => {
+      vsec++;
+      const m = Math.floor(vsec / 60);
+      const s = String(vsec % 60).padStart(2, '0');
+      if (timer) timer.textContent = m + ':' + s;
+      if (vsec >= 300) stopVoiceRecord(false);
+    }, 1000);
+
+    if (navigator.vibrate) navigator.vibrate(50);
+    console.log('Запись началась ✅');
+  } catch (err) {
+    console.error('Ошибка записи:', err);
+    toast('Нет доступа к микрофону');
+    visRecording = false;
+  }
+}
+
+async function stopVoiceRecord(cancel) {
+  if (!visRecording || !vrec) return;
+
+  visRecording = false;
+  clearInterval(vtimer);
+
+  const bar = document.getElementById('recordingBar');
+  if (bar) bar.style.display = 'none';
+  const btn = document.getElementById('voiceBtn');
+  if (btn) btn.classList.remove('recording');
+
+  const rec = vrec;
+  vrec = null;
+
+  try { rec.stop(); } catch (e) {}
+  if (rec.stream) rec.stream.getTracks().forEach(t => t.stop());
+
+  if (cancel || vsec < 1) {
+    vchunks = [];
+    if (cancel) toast('Отменено');
+    else toast('Слишком коротко');
+    return;
+  }
+
+  await new Promise(r => setTimeout(r, 200));
+  const blob = new Blob(vchunks, { type: rec.mimeType || 'audio/webm' });
+  vchunks = [];
+
+  const sizeMB = blob.size / 1024 / 1024;
+  if (sizeMB > 50) { toast('Файл слишком большой'); return; }
+
+  toast('Отправка голосового...');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const up = await apiRequest('upload', 'POST', { image: base64, type: 'voice' });
+    if (!up || !up.url) { toast('Ошибка загрузки'); return; }
+
+    const chatId = getChatId(activeChat);
+    const msgId = Date.now() + '_v';
+    const dur = Math.floor(vsec / 60) + ':' + String(vsec % 60).padStart(2, '0');
+
+    const msg = {
+      id: msgId,
+      chat_id: chatId,
+      from: currentUser.phone,
+      timestamp: Date.now(),
+      type: 'voice',
+      url: up.url,
+      dur: dur,
+      text: ''
+    };
+
+    if (!messages[chatId]) messages[chatId] = [];
+    messages[chatId].push(msg);
+    renderMessages(activeChat);
+
+    await apiRequest('messages/' + chatId + '/' + msgId, 'PUT', msg);
+    vsec = 0;
+    toast('Отправлено ✅');
+  };
+  reader.readAsDataURL(blob);
+}
+
+// ============================================================
+//  ПЛЕЕР ГОЛОСОВЫХ
+// ============================================================
+function toggleVoice(id, btn) {
+  const audio = document.getElementById(id);
+  const wave = document.getElementById(id + '_wave');
+  if (!audio) return;
+
+  document.querySelectorAll('audio').forEach(a => {
+    if (a.id !== id && !a.paused) {
+      a.pause();
+      a.currentTime = 0;
+    }
+  });
+
+  if (audio.paused) {
+    audio.play();
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+    audio.ontimeupdate = () => {
+      if (!audio.duration) return;
+      const progress = audio.currentTime / audio.duration;
+      const bars = wave.querySelectorAll('.voice-bar');
+      bars.forEach((b, i) => {
+        const barProgress = i / bars.length;
+        b.style.opacity = barProgress <= progress ? '1' : '0.3';
+        b.style.background = barProgress <= progress ? 'var(--accent)' : 'var(--text-3)';
+      });
+    };
+
+    audio.onended = () => {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      const bars = wave.querySelectorAll('.voice-bar');
+      bars.forEach(b => { b.style.opacity = '0.3'; b.style.background = 'var(--text-3)'; });
+    };
+  } else {
+    audio.pause();
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  }
 }
 
 // ============================================================
@@ -1117,46 +1327,4 @@ function playRingtone() {
     setTimeout(playBeep, 700);
   };
   playBeep();
-}
-// ============================================================
-//  ПЛЕЕР ГОЛОСОВЫХ
-// ============================================================
-function toggleVoice(id, btn) {
-  const audio = document.getElementById(id);
-  const wave = document.getElementById(id + '_wave');
-  if (!audio) return;
-
-  // Останавливаем другие плееры
-  document.querySelectorAll('audio').forEach(a => {
-    if (a.id !== id && !a.paused) {
-      a.pause();
-      a.currentTime = 0;
-    }
-  });
-
-  if (audio.paused) {
-    audio.play();
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-
-    // Прогресс
-    audio.ontimeupdate = () => {
-      if (!audio.duration) return;
-      const progress = audio.currentTime / audio.duration;
-      const bars = wave.querySelectorAll('.voice-bar');
-      bars.forEach((b, i) => {
-        const barProgress = i / bars.length;
-        b.style.opacity = barProgress <= progress ? '1' : '0.3';
-        b.style.background = barProgress <= progress ? 'var(--accent)' : 'var(--text-3)';
-      });
-    };
-
-    audio.onended = () => {
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
-      const bars = wave.querySelectorAll('.voice-bar');
-      bars.forEach(b => { b.style.opacity = '0.3'; b.style.background = 'var(--text-3)'; });
-    };
-  } else {
-    audio.pause();
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
-  }
 }
