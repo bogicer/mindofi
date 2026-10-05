@@ -1,15 +1,15 @@
 // ============================================================
-//  MINDOFI — Логика страницы логина/регистрации
-//  ТЕСТОВЫЙ РЕЖИМ: OTP показывается в интерфейсе
+//  MINDOFI — Login / Register logic
+//  TEST MODE: OTP is shown in the interface
 // ============================================================
 
-let currentMode = 'login';
+let currentMode = 'login';   // 'login' | 'register'
 let otpPhone = '';
-let otpCode = '';          // тестовый код из ответа сервера
+let otpCode = '';
 let avatarData = null;
 
 // ============================================================
-//  ТЕМА
+//  THEME
 // ============================================================
 let dark = localStorage.getItem('mindofi_dark') === '1';
 
@@ -26,7 +26,7 @@ function toggleTheme() {
 applyTheme();
 
 // ============================================================
-//  ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
+//  SCREEN SWITCHING
 // ============================================================
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -40,14 +40,15 @@ function goBack(screen) {
 
 function toggleMode() {
   currentMode = currentMode === 'login' ? 'register' : 'login';
-  document.getElementById('modeLink').textContent =
-    currentMode === 'login'
-      ? 'Нет аккаунта? Зарегистрироваться'
-      : 'Уже есть аккаунт? Войти';
+  const link = document.getElementById('modeLink');
+  link.textContent = currentMode === 'login'
+    ? t('link_register')
+    : t('link_login');
+  link.dataset.i18n = currentMode === 'login' ? 'link_register' : 'link_login';
 }
 
 // ============================================================
-//  СООБЩЕНИЯ
+//  MESSAGES
 // ============================================================
 function showError(msg) {
   const el = document.getElementById('errBox');
@@ -80,19 +81,19 @@ async function apiPost(path, data) {
     return await res.json();
   } catch (e) {
     console.error('API error:', e);
-    return { success: false, error: 'Нет связи с сервером' };
+    return { success: false, error: t('err_no_server') };
   }
 }
 
 // ============================================================
-//  ШАГ 1: ОТПРАВКА OTP
+//  STEP 1: SEND OTP
 // ============================================================
 async function sendOtp() {
   const country = document.getElementById('countrySelect').value;
   const num = document.getElementById('phoneInput').value.replace(/\D/g, '');
 
   if (!num || num.length < 5) {
-    showError('Введите номер телефона');
+    showError(t('err_fill_phone'));
     return;
   }
 
@@ -100,28 +101,30 @@ async function sendOtp() {
 
   const btn = document.getElementById('phoneBtn');
   btn.disabled = true;
-  btn.textContent = 'Отправка...';
+  btn.textContent = t('loading');
 
   const res = await apiPost('auth/otp', { phone: otpPhone });
 
   btn.disabled = false;
-  btn.textContent = 'Продолжить';
+  btn.textContent = t('btn_continue');
 
   if (!res.success) {
-    showError(res.error || 'Ошибка отправки кода');
+    showError(res.error || t('err_sms_failed'));
     return;
   }
 
-  // ТЕСТОВЫЙ РЕЖИМ: код приходит в ответе сервера
+  // TEST MODE
   otpCode = res.otp || '';
-  document.getElementById('otpHint').textContent = 'Код отправлен на +' + otpPhone;
+  document.getElementById('otpHint').textContent = t('otp_sent_to') + otpPhone;
 
   if (otpCode) {
-    showSuccess('🧪 ТЕСТОВЫЙ КОД: ' + otpCode);
+    showSuccess(t('test_code') + otpCode);
     console.log(
       '%c🧪 OTP: ' + otpCode,
       'background:#1e3a8a;color:#fff;padding:10px 16px;border-radius:8px;font-size:20px;font-weight:bold;'
     );
+  } else {
+    showSuccess(t('ok_sms_sent') + otpPhone);
   }
 
   showScreen('Otp');
@@ -129,7 +132,7 @@ async function sendOtp() {
 }
 
 // ============================================================
-//  ВВОД OTP
+//  OTP INPUT
 // ============================================================
 function otpNext(el, n) {
   el.value = el.value.replace(/\D/g, '');
@@ -154,19 +157,19 @@ function getOtpValue() {
 }
 
 // ============================================================
-//  ШАГ 2: ПРОВЕРКА OTP
+//  STEP 2: VERIFY OTP
 // ============================================================
 async function verifyOtp() {
   const code = getOtpValue();
 
   if (code.length !== 5) {
-    showError('Введите 5 цифр');
+    showError(t('err_enter_5_digits'));
     return;
   }
 
-  // Тестовая проверка — код должен совпасть с тем, что вернул сервер
+  // Test check
   if (otpCode && code !== otpCode) {
-    showError('Неверный код');
+    showError(t('err_wrong_code'));
     for (let i = 1; i <= 5; i++) document.getElementById('o' + i).value = '';
     document.getElementById('o1').focus();
     return;
@@ -178,32 +181,32 @@ async function verifyOtp() {
     return;
   }
 
-  // ЛОГИН
+  // LOGIN
   const res = await apiPost('auth/login', { phone: otpPhone, otp: code });
 
   if (res.success) {
     localStorage.setItem('mindofi_token', res.token);
     localStorage.setItem('mindofi_user', JSON.stringify(res.user));
     localStorage.setItem('mindofi_phone', otpPhone);
-    showSuccess('Вход выполнен!');
+    showSuccess(t('ok_login_done'));
 
     setTimeout(() => {
       window.location.href = 'app.html';
     }, 600);
   } else {
-    showError(res.error || 'Ошибка входа');
+    showError(res.error || t('err_wrong_code'));
   }
 }
 
 // ============================================================
-//  АВАТАР
+//  AVATAR
 // ============================================================
 function onAvatarPick(input) {
   const file = input.files[0];
   if (!file) return;
 
   if (file.size > 2 * 1024 * 1024) {
-    showError('Аватар должен быть до 2 МБ');
+    showError(t('err_avatar_large'));
     return;
   }
 
@@ -217,12 +220,12 @@ function onAvatarPick(input) {
 }
 
 // ============================================================
-//  ШАГ 3: РЕГИСТРАЦИЯ
+//  STEP 3: REGISTER
 // ============================================================
 async function doRegister() {
   const name = document.getElementById('nameInput').value.trim();
   if (!name) {
-    showError('Введите имя');
+    showError(t('err_enter_name'));
     return;
   }
 
@@ -248,18 +251,18 @@ async function doRegister() {
     localStorage.setItem('mindofi_token', res.token);
     localStorage.setItem('mindofi_user', JSON.stringify(res.user));
     localStorage.setItem('mindofi_phone', otpPhone);
-    showSuccess('Аккаунт создан!');
+    showSuccess(t('ok_account_created'));
 
     setTimeout(() => {
       window.location.href = 'app.html';
     }, 600);
   } else {
-    showError(res.error || 'Ошибка регистрации');
+    showError(res.error || t('error'));
   }
 }
 
 // ============================================================
-//  ENTER-НАВИГАЦИЯ
+//  ENTER NAVIGATION
 // ============================================================
 document.getElementById('phoneInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') sendOtp();
@@ -271,4 +274,9 @@ document.getElementById('nameInput').addEventListener('keydown', e => {
 
 document.getElementById('usernameInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') doRegister();
+});
+
+// Re-apply translations after load
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof applyTranslations === 'function') applyTranslations();
 });
