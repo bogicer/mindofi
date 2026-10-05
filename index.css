@@ -315,3 +315,52 @@ body {
   .title { font-size: 24px; }
   .logo { width: 72px; height: 72px; }
 }
+
+/* === Переключатель языка === */
+.lang-top {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+}
+
+.lang-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.lang-switch button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.lang-switch button:hover {
+  background: var(--hover);
+  color: var(--accent);
+}
+
+.lang-switch button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .lang-switch button {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
