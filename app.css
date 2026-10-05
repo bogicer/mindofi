@@ -64,7 +64,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 .mobile-back-btn,
 .mobile-close-btn { display: none; }
 
-/* ===== САЙДБАР ===== */
+/* ===== SIDEBAR ===== */
 .sidebar {
   width: 340px;
   background: var(--panel);
@@ -97,8 +97,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 .sidebar-actions { display: flex; gap: 4px; }
 
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   border-radius: 10px;
   border: none;
   background: transparent;
@@ -123,7 +122,6 @@ button, input, textarea { font-family: inherit; outline: none; }
   background: var(--input-bg);
   border: 1.5px solid var(--border);
   border-radius: 12px;
-  transition: border-color 0.15s;
   flex-shrink: 0;
 }
 
@@ -179,8 +177,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 .chat-item.active { background: var(--accent-soft); }
 
 .chat-item-avatar {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -243,7 +240,6 @@ button, input, textarea { font-family: inherit; outline: none; }
   min-width: 0;
   padding: 4px 6px;
   border-radius: 10px;
-  transition: background 0.15s;
 }
 .me:hover { background: var(--hover); }
 
@@ -290,7 +286,6 @@ button, input, textarea { font-family: inherit; outline: none; }
 .empty-title { font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: 3px; }
 .empty-text { font-size: 14px; color: var(--text-2); }
 
-/* ===== ЧАТ ===== */
 .chat {
   flex: 1;
   display: flex;
@@ -385,7 +380,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 .message-image { max-width: 260px; border-radius: 12px; overflow: hidden; cursor: pointer; }
 .message-image img { width: 100%; display: block; }
 
-/* ===== ИНДИКАТОР ЗАПИСИ ===== */
+/* ===== RECORDING ===== */
 .recording-bar {
   display: none;
   align-items: center;
@@ -420,7 +415,7 @@ button, input, textarea { font-family: inherit; outline: none; }
   animation: recPulse 1s infinite;
 }
 
-/* ===== ПЛЕЕР ГОЛОСОВЫХ ===== */
+/* ===== VOICE PLAYER ===== */
 .voice-msg {
   display: flex;
   align-items: center;
@@ -493,7 +488,6 @@ button, input, textarea { font-family: inherit; outline: none; }
   border: 1.5px solid var(--border);
   border-radius: 22px;
   padding: 8px 16px;
-  transition: border-color 0.15s;
   min-width: 0;
 }
 
@@ -517,7 +511,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 .send-btn { background: var(--accent); color: #fff; }
 .send-btn:hover { background: var(--accent-hover); color: #fff; }
 
-/* ===== МОДАЛКИ ===== */
+/* ===== MODALS ===== */
 .modal {
   position: fixed;
   inset: 0;
@@ -534,7 +528,7 @@ button, input, textarea { font-family: inherit; outline: none; }
   background: var(--panel);
   border-radius: 20px;
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow);
@@ -661,9 +655,33 @@ button, input, textarea { font-family: inherit; outline: none; }
 
 .settings-item:last-child { border-bottom: none; }
 .settings-item:hover { background: var(--hover); color: var(--accent); }
-.settings-footer { padding: 16px; font-size: 11px; color: var(--text-3); text-align: center; }
+.settings-footer { padding: 16px; font-size: 11px; color: var(--text-3); text-align: center; line-height: 1.8; }
 
-/* ===== ЗВОНОК ===== */
+/* ===== LANG PICKER ===== */
+.lang-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 20px 16px;
+}
+
+.lang-picker button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.lang-picker button:hover { border-color: var(--accent); color: var(--accent); }
+.lang-picker button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ===== CALL ===== */
 .call-screen {
   position: fixed;
   inset: 0;
@@ -792,7 +810,7 @@ button, input, textarea { font-family: inherit; outline: none; }
 
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ===== МОБИЛЬНАЯ ===== */
+/* ===== MOBILE ===== */
 @media (max-width: 768px) {
 
   .mobile-menu-btn {
@@ -878,12 +896,7 @@ button, input, textarea { font-family: inherit; outline: none; }
   .chat-actions .icon-btn { width: 32px; height: 32px; }
   .chat-actions .icon-btn svg { width: 16px; height: 16px; }
 
-  .messages {
-    padding: 12px 12px;
-    min-height: 0;
-    flex: 1;
-    overflow-y: auto;
-  }
+  .messages { padding: 12px 12px; min-height: 0; flex: 1; overflow-y: auto; }
   .message { max-width: 88%; }
   .message-bubble { padding: 9px 13px; font-size: 14px; }
 
