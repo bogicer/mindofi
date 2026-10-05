@@ -55,7 +55,8 @@
 const CONTACT = {
   email: "med1asksmain@gmail.com",
   support: "@admin",
-  operator: "Koder Digital",
+  company: "Koder Digital",
+  product: "MINDOFI",
   address: {
     en: "Vynnyky, Lviv region, Lychakiv district, Ukraine",
     uk: "м. Винники, Львівська область, Личаківський район",
@@ -71,95 +72,95 @@ const T = {
     title: "MINDOFI Terms of Service",
     date: "Last updated: October 5, 2026",
     sections: [
-      { h: "1. Acceptance of Terms", b: `<p>By using MINDOFI messenger (the "Service"), operated by ${CONTACT.operator}, you agree to these Terms. If you disagree — do not use the Service.</p>` },
+      { h: "1. Acceptance of Terms", b: `<p>By using the MINDOFI messenger (the "Service"), a product of <strong>${CONTACT.company}</strong>, you agree to these Terms. If you disagree — do not use the Service.</p>` },
       { h: "2. Service Description", b: `<p>MINDOFI provides text messages, files, voice messages, audio and video calls between users.</p>` },
       { h: "3. Registration and Account", b: `<ul><li>Registration requires a phone number</li><li>You must provide accurate data and not impersonate others</li><li>You are responsible for account security</li><li>Transferring your account to third parties is prohibited</li><li>Minimum age: <strong>13 years</strong></li></ul>` },
       { h: "4. Code of Conduct", b: `<p><strong>PROHIBITED:</strong></p><ul><li>Spam, mass mailings, unsolicited advertising</li><li>Materials violating the law: child pornography, extremism, incitement to violence, drugs</li><li>Threats, insults, harassment</li><li>Hacking the Service, bypassing security, automated attacks</li><li>Creating multiple accounts to evade bans</li><li>Distributing malware</li><li>Copyright infringement</li></ul><p>Violations may result in <strong>immediate account blocking</strong>.</p>` },
       { h: "5. User Content", b: `<ul><li>You retain rights to your content</li><li>By sending content, you grant the Service the right to store and transmit it</li><li>You are fully responsible for what you send</li></ul>` },
-      { h: "6. Intellectual Property", b: `<p>The MINDOFI name, logo, code, and design belong to ${CONTACT.operator}. Copying, modification, or distribution without permission is prohibited.</p>` },
-      { h: "7. Limitation of Liability", b: `<p>The Service is provided <strong>"as is"</strong>. We do not guarantee uninterrupted operation, preservation of all messages, or fitness for specific purposes. We are not liable for losses, actions of other users, or data loss during failures.</p>` },
+      { h: "6. Intellectual Property", b: `<p>The MINDOFI name, logo, code, and design belong to <strong>${CONTACT.company}</strong>. Copying, modification, or distribution without permission is prohibited.</p>` },
+      { h: "7. Limitation of Liability", b: `<p>The Service is provided <strong>"as is"</strong>. ${CONTACT.company} does not guarantee uninterrupted operation, preservation of all messages, or fitness for specific purposes. We are not liable for losses, actions of other users, or data loss during failures.</p>` },
       { h: "8. Account Suspension", b: `<p>We may block or delete your account for: violations of these Terms, official requests from law enforcement, or suspicious activity.</p>` },
       { h: "9. Changes to Terms", b: `<p>We may change these Terms. Significant changes will be announced in the app.</p>` },
       { h: "10. Termination", b: `<p>You can delete your account anytime in settings, by emailing ${CONTACT.email}, or by messaging ${CONTACT.support} in the app.</p>` },
-      { h: "11. Contact", b: `<p><strong>Operator:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p><p><strong>Address:</strong> ${CONTACT.address.en}</p>` }
+      { h: "11. Contact", b: `<p><strong>Company:</strong> ${CONTACT.company}</p><p><strong>Product:</strong> ${CONTACT.product}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Support in app:</strong> ${CONTACT.support}</p><p><strong>Address:</strong> ${CONTACT.address.en}</p>` }
     ],
-    footer: "© 2026 MINDOFI by Koder Digital. All rights reserved."
+    footer: `© 2026 ${CONTACT.company}. MINDOFI is a product of ${CONTACT.company}. All rights reserved.`
   },
   uk: {
     back: "← Назад у додаток",
     title: "Угода користувача MINDOFI",
     date: "Останнє оновлення: 5 жовтня 2026 р.",
     sections: [
-      { h: "1. Прийняття умов", b: `<p>Використовуючи месенджер MINDOFI (далі — «Сервіс»), що управляється ${CONTACT.operator}, ви погоджуєтесь з цією Угодою. Якщо не згодні — не користуйтесь Сервісом.</p>` },
+      { h: "1. Прийняття умов", b: `<p>Використовуючи месенджер MINDOFI (далі — «Сервіс»), продукт компанії <strong>${CONTACT.company}</strong>, ви погоджуєтесь з цією Угодою. Якщо не згодні — не користуйтесь Сервісом.</p>` },
       { h: "2. Опис Сервісу", b: `<p>MINDOFI надає можливість обміну текстовими повідомленнями, файлами, голосовими повідомленнями, а також аудіо- та відеодзвінками.</p>` },
       { h: "3. Реєстрація та акаунт", b: `<ul><li>Для користування потрібна реєстрація з номером телефону</li><li>Ви зобов'язуєтесь надавати достовірні дані й не видавати себе за інших</li><li>Ви несете відповідальність за безпеку акаунта</li><li>Передача акаунта третім особам заборонена</li><li>Мінімальний вік: <strong>13 років</strong></li></ul>` },
       { h: "4. Правила поведінки", b: `<p><strong>ЗАБОРОНЕНО:</strong></p><ul><li>Спам, масові розсилки, реклама без згоди</li><li>Матеріали, що порушують закон: дитяча порнографія, екстремізм, заклики до насильства, наркотики</li><li>Погрози, образи, переслідування</li><li>Злам Сервісу, обхід захисту, автоматизовані атаки</li><li>Створення кількох акаунтів для обходу банів</li><li>Розповсюдження шкідливого ПЗ</li><li>Порушення авторських прав</li></ul><p>За порушення — <strong>блокування без попередження</strong>.</p>` },
       { h: "5. Контент користувача", b: `<ul><li>Ви зберігаєте права на свій контент</li><li>Надсилаючи контент, ви даєте Сервісу право зберігати й передавати його</li><li>Ви несете повну відповідальність за надіслане</li></ul>` },
-      { h: "6. Інтелектуальна власність", b: `<p>Назва MINDOFI, логотип, код і дизайн належать ${CONTACT.operator}. Копіювання, модифікація чи розповсюдження без дозволу заборонені.</p>` },
-      { h: "7. Обмеження відповідальності", b: `<p>Сервіс надається <strong>«як є»</strong>. Ми не гарантуємо безперебійну роботу, збереження всіх повідомлень чи відповідність конкретним задачам. Не несемо відповідальності за збитки, дії інших користувачів чи втрату даних при збоях.</p>` },
+      { h: "6. Інтелектуальна власність", b: `<p>Назва MINDOFI, логотип, код і дизайн належать <strong>${CONTACT.company}</strong>. Копіювання, модифікація чи розповсюдження без дозволу заборонені.</p>` },
+      { h: "7. Обмеження відповідальності", b: `<p>Сервіс надається <strong>«як є»</strong>. ${CONTACT.company} не гарантує безперебійну роботу, збереження всіх повідомлень чи відповідність конкретним задачам. Не несемо відповідальності за збитки, дії інших користувачів чи втрату даних при збоях.</p>` },
       { h: "8. Блокування акаунта", b: `<p>Ми можемо заблокувати чи видалити акаунт за: порушення цієї Угоди, офіційні запити правоохоронних органів, підозрілу активність.</p>` },
       { h: "9. Зміни умов", b: `<p>Ми можемо змінювати Угоду. Про суттєві зміни повідомимо у додатку.</p>` },
       { h: "10. Припинення використання", b: `<p>Ви можете видалити акаунт у налаштуваннях, написавши на ${CONTACT.email} або ${CONTACT.support} у додатку.</p>` },
-      { h: "11. Контакти", b: `<p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p><p><strong>Адреса:</strong> ${CONTACT.address.uk}</p>` }
+      { h: "11. Контакти", b: `<p><strong>Компанія:</strong> ${CONTACT.company}</p><p><strong>Продукт:</strong> ${CONTACT.product}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Підтримка в додатку:</strong> ${CONTACT.support}</p><p><strong>Адреса:</strong> ${CONTACT.address.uk}</p>` }
     ],
-    footer: "© 2026 MINDOFI від Koder Digital. Усі права захищені."
+    footer: `© 2026 ${CONTACT.company}. MINDOFI — продукт компанії ${CONTACT.company}. Усі права захищені.`
   },
   ru: {
     back: "← Назад в приложение",
     title: "Пользовательское соглашение MINDOFI",
     date: "Дата последнего обновления: 5 октября 2026 г.",
     sections: [
-      { h: "1. Принятие условий", b: `<p>Используя мессенджер MINDOFI (далее — «Сервис»), управляемый ${CONTACT.operator}, вы соглашаетесь с настоящим Соглашением. Если не согласны — не используйте Сервис.</p>` },
+      { h: "1. Принятие условий", b: `<p>Используя мессенджер MINDOFI (далее — «Сервис»), продукт компании <strong>${CONTACT.company}</strong>, вы соглашаетесь с настоящим Соглашением. Если не согласны — не используйте Сервис.</p>` },
       { h: "2. Описание Сервиса", b: `<p>MINDOFI предоставляет возможность обмена текстовыми сообщениями, файлами, голосовыми сообщениями, а также аудио- и видеозвонками.</p>` },
       { h: "3. Регистрация и аккаунт", b: `<ul><li>Для использования требуется регистрация с номером телефона</li><li>Вы обязуетесь предоставлять достоверные данные и не выдавать себя за других</li><li>Вы несёте ответственность за безопасность аккаунта</li><li>Передача аккаунта третьим лицам запрещена</li><li>Минимальный возраст: <strong>13 лет</strong></li></ul>` },
       { h: "4. Правила поведения", b: `<p><strong>ЗАПРЕЩЕНО:</strong></p><ul><li>Спам, массовые рассылки, реклама без согласия</li><li>Материалы, нарушающие закон: детская порнография, экстремизм, призывы к насилию, наркотики</li><li>Угрозы, оскорбления, преследования</li><li>Взлом Сервиса, обход защиты, автоматизированные атаки</li><li>Создание нескольких аккаунтов для обхода банов</li><li>Распространение вредоносного ПО</li><li>Нарушение авторских прав</li></ul><p>За нарушение — <strong>блокировка без предупреждения</strong>.</p>` },
       { h: "5. Контент пользователя", b: `<ul><li>Вы сохраняете права на свой контент</li><li>Отправляя контент, вы даёте Сервису право хранить и передавать его</li><li>Вы несёте полную ответственность за отправленное</li></ul>` },
-      { h: "6. Интеллектуальная собственность", b: `<p>Название MINDOFI, логотип, код и дизайн принадлежат ${CONTACT.operator}. Копирование, модификация или распространение без разрешения запрещены.</p>` },
-      { h: "7. Ограничение ответственности", b: `<p>Сервис предоставляется <strong>«как есть»</strong>. Мы не гарантируем бесперебойную работу, сохранение всех сообщений или соответствие конкретным задачам. Не несём ответственности за убытки, действия других пользователей или потерю данных при сбоях.</p>` },
+      { h: "6. Интеллектуальная собственность", b: `<p>Название MINDOFI, логотип, код и дизайн принадлежат <strong>${CONTACT.company}</strong>. Копирование, модификация или распространение без разрешения запрещены.</p>` },
+      { h: "7. Ограничение ответственности", b: `<p>Сервис предоставляется <strong>«как есть»</strong>. ${CONTACT.company} не гарантирует бесперебойную работу, сохранение всех сообщений или соответствие конкретным задачам. Не несём ответственности за убытки, действия других пользователей или потерю данных при сбоях.</p>` },
       { h: "8. Блокировка аккаунта", b: `<p>Мы можем заблокировать или удалить аккаунт за: нарушение Соглашения, официальные запросы правоохранительных органов, подозрительную активность.</p>` },
       { h: "9. Изменения условий", b: `<p>Мы можем изменять Соглашение. О существенных изменениях уведомим в приложении.</p>` },
       { h: "10. Прекращение использования", b: `<p>Вы можете удалить аккаунт в настройках, написав на ${CONTACT.email} или ${CONTACT.support} в приложении.</p>` },
-      { h: "11. Контакты", b: `<p><strong>Оператор:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p><p><strong>Адрес:</strong> ${CONTACT.address.ru}</p>` }
+      { h: "11. Контакты", b: `<p><strong>Компания:</strong> ${CONTACT.company}</p><p><strong>Продукт:</strong> ${CONTACT.product}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Поддержка в приложении:</strong> ${CONTACT.support}</p><p><strong>Адрес:</strong> ${CONTACT.address.ru}</p>` }
     ],
-    footer: "© 2026 MINDOFI от Koder Digital. Все права защищены."
+    footer: `© 2026 ${CONTACT.company}. MINDOFI — продукт компании ${CONTACT.company}. Все права защищены.`
   },
   de: {
     back: "← Zurück zur App",
     title: "MINDOFI Nutzungsbedingungen",
     date: "Zuletzt aktualisiert: 5. Oktober 2026",
     sections: [
-      { h: "1. Annahme der Bedingungen", b: `<p>Durch die Nutzung des MINDOFI-Messengers (der „Dienst"), betrieben von ${CONTACT.operator}, stimmen Sie diesen Bedingungen zu. Wenn Sie nicht einverstanden sind — nutzen Sie den Dienst nicht.</p>` },
+      { h: "1. Annahme der Bedingungen", b: `<p>Durch die Nutzung des MINDOFI-Messengers (der „Dienst"), ein Produkt von <strong>${CONTACT.company}</strong>, stimmen Sie diesen Bedingungen zu. Wenn Sie nicht einverstanden sind — nutzen Sie den Dienst nicht.</p>` },
       { h: "2. Beschreibung des Dienstes", b: `<p>MINDOFI bietet Textnachrichten, Dateien, Sprachnachrichten sowie Audio- und Videoanrufe zwischen Nutzern.</p>` },
       { h: "3. Registrierung und Konto", b: `<ul><li>Für die Nutzung ist eine Registrierung mit Telefonnummer erforderlich</li><li>Sie verpflichten sich, korrekte Daten anzugeben und sich nicht als andere auszugeben</li><li>Sie sind für die Kontosicherheit verantwortlich</li><li>Die Übertragung des Kontos an Dritte ist verboten</li><li>Mindestalter: <strong>13 Jahre</strong></li></ul>` },
       { h: "4. Verhaltensregeln", b: `<p><strong>VERBOTEN:</strong></p><ul><li>Spam, Massenaussendungen, unerwünschte Werbung</li><li>Rechtswidrige Inhalte: Kinderpornografie, Extremismus, Aufrufe zur Gewalt, Drogen</li><li>Drohungen, Beleidigungen, Belästigung</li><li>Hacking des Dienstes, Umgehung der Sicherheit, automatisierte Angriffe</li><li>Erstellen mehrerer Konten zur Umgehung von Sperren</li><li>Verbreitung von Malware</li><li>Urheberrechtsverletzungen</li></ul><p>Bei Verstößen — <strong>sofortige Kontosperrung</strong>.</p>` },
       { h: "5. Nutzerinhalte", b: `<ul><li>Sie behalten die Rechte an Ihren Inhalten</li><li>Durch das Senden von Inhalten gewähren Sie dem Dienst das Recht, diese zu speichern und zu übertragen</li><li>Sie sind voll verantwortlich für das Gesendete</li></ul>` },
-      { h: "6. Geistiges Eigentum", b: `<p>Name MINDOFI, Logo, Code und Design gehören ${CONTACT.operator}. Kopieren, Ändern oder Verbreiten ohne Erlaubnis ist verboten.</p>` },
-      { h: "7. Haftungsbeschränkung", b: `<p>Der Dienst wird <strong>„wie besehen"</strong> bereitgestellt. Wir garantieren weder unterbrechungsfreien Betrieb noch Erhalt aller Nachrichten noch Eignung für bestimmte Zwecke. Wir haften nicht für Verluste, Handlungen anderer Nutzer oder Datenverlust bei Ausfällen.</p>` },
+      { h: "6. Geistiges Eigentum", b: `<p>Name MINDOFI, Logo, Code und Design gehören <strong>${CONTACT.company}</strong>. Kopieren, Ändern oder Verbreiten ohne Erlaubnis ist verboten.</p>` },
+      { h: "7. Haftungsbeschränkung", b: `<p>Der Dienst wird <strong>„wie besehen"</strong> bereitgestellt. ${CONTACT.company} garantiert weder unterbrechungsfreien Betrieb noch Erhalt aller Nachrichten noch Eignung für bestimmte Zwecke. Wir haften nicht für Verluste, Handlungen anderer Nutzer oder Datenverlust bei Ausfällen.</p>` },
       { h: "8. Kontosperrung", b: `<p>Wir können Ihr Konto sperren oder löschen bei: Verstößen gegen diese Bedingungen, offiziellen Anfragen von Strafverfolgungsbehörden, verdächtiger Aktivität.</p>` },
       { h: "9. Änderungen der Bedingungen", b: `<p>Wir können diese Bedingungen ändern. Wesentliche Änderungen werden in der App angekündigt.</p>` },
       { h: "10. Beendigung", b: `<p>Sie können Ihr Konto jederzeit in den Einstellungen, per E-Mail an ${CONTACT.email} oder ${CONTACT.support} in der App löschen.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>Betreiber:</strong> ${CONTACT.operator}</p><p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p><p><strong>Adresse:</strong> ${CONTACT.address.de}</p>` }
+      { h: "11. Kontakt", b: `<p><strong>Unternehmen:</strong> ${CONTACT.company}</p><p><strong>Produkt:</strong> ${CONTACT.product}</p><p><strong>E-Mail:</strong> ${CONTACT.email}</p><p><strong>Support in der App:</strong> ${CONTACT.support}</p><p><strong>Adresse:</strong> ${CONTACT.address.de}</p>` }
     ],
-    footer: "© 2026 MINDOFI von Koder Digital. Alle Rechte vorbehalten."
+    footer: `© 2026 ${CONTACT.company}. MINDOFI ist ein Produkt von ${CONTACT.company}. Alle Rechte vorbehalten.`
   },
   pl: {
     back: "← Powrót do aplikacji",
     title: "Regulamin MINDOFI",
     date: "Ostatnia aktualizacja: 5 października 2026",
     sections: [
-      { h: "1. Akceptacja warunków", b: `<p>Korzystając z komunikatora MINDOFI (dalej — „Usługa"), obsługiwanego przez ${CONTACT.operator}, akceptujesz niniejszy Regulamin. Jeśli się nie zgadzasz — nie korzystaj z Usługi.</p>` },
+      { h: "1. Akceptacja warunków", b: `<p>Korzystając z komunikatora MINDOFI (dalej — „Usługa"), produktu firmy <strong>${CONTACT.company}</strong>, akceptujesz niniejszy Regulamin. Jeśli się nie zgadzasz — nie korzystaj z Usługi.</p>` },
       { h: "2. Opis Usługi", b: `<p>MINDOFI umożliwia wymianę wiadomości tekstowych, plików, wiadomości głosowych oraz połączeń audio i wideo między użytkownikami.</p>` },
       { h: "3. Rejestracja i konto", b: `<ul><li>Do korzystania wymagana jest rejestracja z numerem telefonu</li><li>Zobowiązujesz się podawać prawdziwe dane i nie podszywać się pod inne osoby</li><li>Odpowiadasz za bezpieczeństwo konta</li><li>Przekazywanie konta osobom trzecim jest zabronione</li><li>Minimalny wiek: <strong>13 lat</strong></li></ul>` },
       { h: "4. Zasady zachowania", b: `<p><strong>ZABRONIONE:</strong></p><ul><li>Spam, masowe wysyłki, reklama bez zgody</li><li>Treści niezgodne z prawem: pornografia dziecięca, ekstremizm, nawoływanie do przemocy, narkotyki</li><li>Grozby, obraźliwe słowa, nękanie</li><li>Hakowanie Usługi, obchodzenie zabezpieczeń, ataki automatyczne</li><li>Tworzenie wielu kont w celu obejścia blokad</li><li>Rozpowszechnianie złośliwego oprogramowania</li><li>Naruszenia praw autorskich</li></ul><p>Za naruszenia — <strong>natychmiastowa blokada konta</strong>.</p>` },
       { h: "5. Treści użytkownika", b: `<ul><li>Zachowujesz prawa do swoich treści</li><li>Wysyłając treści, udzielasz Usłudze prawa do ich przechowywania i przekazywania</li><li>Ponosisz pełną odpowiedzialność za wysyłane treści</li></ul>` },
-      { h: "6. Własność intelektualna", b: `<p>Nazwa MINDOFI, logo, kod i projekt należą do ${CONTACT.operator}. Kopiowanie, modyfikacja lub rozpowszechnianie bez pozwolenia są zabronione.</p>` },
-      { h: "7. Ograniczenie odpowiedzialności", b: `<p>Usługa świadczona jest <strong>„tak jak jest"</strong>. Nie gwarantujemy nieprzerwanego działania, zachowania wszystkich wiadomości ani przydatności do konkretnych celów. Nie odpowiadamy za straty, działania innych użytkowników ani utratę danych podczas awarii.</p>` },
+      { h: "6. Własność intelektualna", b: `<p>Nazwa MINDOFI, logo, kod i projekt należą do <strong>${CONTACT.company}</strong>. Kopiowanie, modyfikacja lub rozpowszechnianie bez pozwolenia są zabronione.</p>` },
+      { h: "7. Ograniczenie odpowiedzialności", b: `<p>Usługa świadczona jest <strong>„tak jak jest"</strong>. ${CONTACT.company} nie gwarantuje nieprzerwanego działania, zachowania wszystkich wiadomości ani przydatności do konkretnych celów. Nie odpowiadamy za straty, działania innych użytkowników ani utratę danych podczas awarii.</p>` },
       { h: "8. Blokada konta", b: `<p>Możemy zablokować lub usunąć Twoje konto za: naruszenia Regulaminu, oficjalne żądania organów ścigania, podejrzaną aktywność.</p>` },
       { h: "9. Zmiany warunków", b: `<p>Możemy zmieniać Regulamin. O istotnych zmianach poinformujemy w aplikacji.</p>` },
       { h: "10. Zakończenie korzystania", b: `<p>Możesz usunąć konto w ustawieniach, pisząc na ${CONTACT.email} lub ${CONTACT.support} w aplikacji.</p>` },
-      { h: "11. Kontakt", b: `<p><strong>Operator:</strong> ${CONTACT.operator}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p><p><strong>Adres:</strong> ${CONTACT.address.pl}</p>` }
+      { h: "11. Kontakt", b: `<p><strong>Firma:</strong> ${CONTACT.company}</p><p><strong>Produkt:</strong> ${CONTACT.product}</p><p><strong>Email:</strong> ${CONTACT.email}</p><p><strong>Wsparcie w aplikacji:</strong> ${CONTACT.support}</p><p><strong>Adres:</strong> ${CONTACT.address.pl}</p>` }
     ],
-    footer: "© 2026 MINDOFI od Koder Digital. Wszelkie prawa zastrzeżone."
+    footer: `© 2026 ${CONTACT.company}. MINDOFI to produkt ${CONTACT.company}. Wszelkie prawa zastrzeżone.`
   }
 };
 
