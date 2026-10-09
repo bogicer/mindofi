@@ -72,15 +72,36 @@ let ctxIsMine = false;
 let ctxMessageText = '';
 let longPressTimer = null;
 
+// ============================================================
+//  ICE CONFIG — Metered TURN
+//  ⚠️ ЗАМЕНИ username и credential на СВОИ из metered.ca
+// ============================================================
 const ICE_CONFIG = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:openrelay.metered.ca:80' },
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-  ]
-};
+const iceServers = [
+  {
+    urls: "stun:stun.relay.metered.ca:80",
+  },
+  {
+    urls: "turn:global.relay.metered.ca:80",
+    username: "18629aff3add3ee13d19da4a",
+    credential: "4uqS76DRAMe51SEL",
+  },
+  {
+    urls: "turn:global.relay.metered.ca:80?transport=tcp",
+    username: "18629aff3add3ee13d19da4a",
+    credential: "4uqS76DRAMe51SEL",
+  },
+  {
+    urls: "turn:global.relay.metered.ca:443",
+    username: "18629aff3add3ee13d19da4a",
+    credential: "4uqS76DRAMe51SEL",
+  },
+  {
+    urls: "turns:global.relay.metered.ca:443?transport=tcp",
+    username: "18629aff3add3ee13d19da4a",
+    credential: "4uqS76DRAMe51SEL",
+  },
+];
 
 // ============================================================
 //  INIT
@@ -1028,12 +1049,11 @@ function openProfile() {
 }
 
 // ============================================================
-//  ATTACH REMOTE STREAM (звук в звонках)
+//  ATTACH REMOTE STREAM
 // ============================================================
 function attachRemoteStream() {
   const rv = document.getElementById('remoteVideo');
   if (!rv) {
-    console.warn('📞 remoteVideo not found, retry in 200ms');
     setTimeout(attachRemoteStream, 200);
     return;
   }
@@ -1105,6 +1125,10 @@ async function initCall(type) {
     }
   };
 
+  pc.oniceconnectionstatechange = () => {
+    console.log('📞 ICE state:', pc.iceConnectionState);
+  };
+
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
@@ -1149,8 +1173,6 @@ async function initCall(type) {
         startCallTimer();
         document.getElementById('callStatus').style.display = 'none';
         document.getElementById('callTimer').style.display = 'block';
-
-        // Fallback на случай если ontrack пришёл раньше
         if (remoteStream) attachRemoteStream();
       } catch (e) { console.error(e); }
     }
@@ -1206,6 +1228,10 @@ async function acceptCall() {
     }
   };
 
+  pc.oniceconnectionstatechange = () => {
+    console.log('📞 ICE state:', pc.iceConnectionState);
+  };
+
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.offer)));
     const cands = await apiRequest('ice/' + callId);
@@ -1225,8 +1251,6 @@ async function acceptCall() {
     startCallTimer();
     document.getElementById('callStatus').style.display = 'none';
     document.getElementById('callTimer').style.display = 'block';
-
-    // Fallback
     if (remoteStream) attachRemoteStream();
 
     const icePoll = setInterval(async () => {
@@ -1237,7 +1261,6 @@ async function acceptCall() {
           try { await pc.addIceCandidate(new RTCIceCandidate(c[cid])); } catch (e) {}
         }
       }
-      // Пробуем ещё раз привязать стрим если не привязался
       const rv = document.getElementById('remoteVideo');
       if (rv && !rv.srcObject && remoteStream) attachRemoteStream();
     }, 1500);
@@ -1407,7 +1430,7 @@ function playRingtone() {
 }
 
 // ============================================================
-//  BIND VOICE BUTTON (independent from init)
+//  BIND VOICE BUTTON
 // ============================================================
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', bindVoiceButton);
