@@ -77,31 +77,31 @@ let longPressTimer = null;
 //  ⚠️ ЗАМЕНИ username и credential на СВОИ из metered.ca
 // ============================================================
 const ICE_CONFIG = {
-iceServers: [
-  {
-    urls: "stun:stun.relay.metered.ca:80",
-  },
-  {
-    urls: "turn:global.relay.metered.ca:80",
-    username: "18629aff3add3ee13d19da4a",
-    credential: "4uqS76DRAMe51SEL",
-  },
-  {
-    urls: "turn:global.relay.metered.ca:80?transport=tcp",
-    username: "18629aff3add3ee13d19da4a",
-    credential: "4uqS76DRAMe51SEL",
-  },
-  {
-    urls: "turn:global.relay.metered.ca:443",
-    username: "18629aff3add3ee13d19da4a",
-    credential: "4uqS76DRAMe51SEL",
-  },
-  {
-    urls: "turns:global.relay.metered.ca:443?transport=tcp",
-    username: "18629aff3add3ee13d19da4a",
-    credential: "4uqS76DRAMe51SEL",
-  },
-];
+  iceServers: [
+    { urls: "stun:stun.relay.metered.ca:80" },
+    {
+      urls: "turn:standard.relay.metered.ca:80",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL"
+    },
+    {
+      urls: "turn:standard.relay.metered.ca:80?transport=tcp",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL"
+    },
+    {
+      urls: "turn:standard.relay.metered.ca:443",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL"
+    },
+    {
+      urls: "turns:standard.relay.metered.ca:443?transport=tcp",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL"
+    }
+  ],
+  iceCandidatePoolSize: 10
+};
 
 // ============================================================
 //  INIT
