@@ -77,7 +77,7 @@ let longPressTimer = null;
 //  ⚠️ ЗАМЕНИ username и credential на СВОИ из metered.ca
 // ============================================================
 const ICE_CONFIG = {
-const iceServers = [
+iceServers: [
   {
     urls: "stun:stun.relay.metered.ca:80",
   },
