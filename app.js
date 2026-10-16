@@ -92,23 +92,23 @@ const ICE_CONFIG = {
     { urls: "stun:stun.relay.metered.ca:80" },
     {
       urls: "turn:standard.relay.metered.ca:80",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL"
     },
     {
       urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL"
     },
     {
       urls: "turn:standard.relay.metered.ca:443",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL"
     },
     {
       urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL"
     }
   ],
   iceCandidatePoolSize: 10
@@ -343,7 +343,6 @@ async function loadUsers() {
 // ============================================================
 function renderChatList() {
   const list = document.getElementById('chatList');
-  list.innerHTML = '';
 
   const chatItems = [];
   for (const phone in users) {
@@ -352,7 +351,6 @@ function renderChatList() {
     const chatId = chatIdByPhone[phone] || getChatId(phone);
     const msgs = messages[chatId] || [];
 
-    // Пропускаем чаты без сообщений
     if (msgs.length === 0) continue;
 
     const lastMsg = msgs[msgs.length - 1];
@@ -377,6 +375,19 @@ function renderChatList() {
   if (currentTab === 'groups') filtered = [];
   if (currentTab === 'channels') filtered = [];
 
+  // ⚠️ Snapshot — если не изменилось, DOM не трогаем
+  const snapshot = filtered.map(item => {
+    const last = item.lastMsg;
+    return item.phone + '|' +
+           (item.user.name || '') + '|' +
+           (item.user.online ? '1' : '0') + '|' +
+           (item.user.photoURL || '') + '|' +
+           (last ? last.timestamp : '');
+  }).join('#');
+
+  if (list.dataset.snapshot === snapshot) return;
+  list.dataset.snapshot = snapshot;
+
   if (!filtered.length) {
     const msg = chatItems.length === 0
       ? (typeof t === 'function' ? t('no_chats') : 'No chats')
@@ -384,6 +395,8 @@ function renderChatList() {
     list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-3);font-size:13px">' + msg + '</div>';
     return;
   }
+
+  const temp = document.createElement('div');
 
   filtered.forEach(item => {
     const el = document.createElement('div');
@@ -414,8 +427,10 @@ function renderChatList() {
       '</div>' +
       '<div class="chat-item-time">' + time + '</div>';
 
-    list.appendChild(el);
+    temp.appendChild(el);
   });
+
+  list.replaceChildren(...temp.childNodes);
 }
 
 // ============================================================
@@ -442,6 +457,11 @@ async function openChat(phone) {
     : (typeof t === 'function' ? t('status_offline') : 'Offline');
 
   renderChatList();
+
+  // ⚠️ Рендерим сразу, чтобы чат не был пустым
+  renderMessages(phone);
+
+  // Потом догружаем с сервера
   await loadMessages(phone);
 
   if (window.innerWidth <= 768) {
@@ -480,13 +500,16 @@ async function loadMessages(phone) {
     newMsgs = [];
   }
 
-  // ⚠️ Сравниваем старые и новые — не рендерим если ничего не изменилось
   const oldJson = JSON.stringify(messages[chatId] || []);
   const newJson = JSON.stringify(newMsgs);
 
   messages[chatId] = newMsgs;
 
-  if (oldJson !== newJson) {
+  // Рендерим если данные изменились ИЛИ контейнер пустой
+  const container = document.getElementById('messages');
+  const isEmpty = !container.children.length || !!container.querySelector('div[style*="flex:1"]');
+
+  if (oldJson !== newJson || isEmpty) {
     renderMessages(phone);
   }
 }
@@ -494,7 +517,7 @@ async function loadMessages(phone) {
 function renderMessages(phone) {
   const container = document.getElementById('messages');
 
-  // ⚠️ Сохраняем позицию скролла ПЕРЕД перерисовкой
+  // Сохраняем позицию скролла
   const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
   const oldScrollTop = container.scrollTop;
 
@@ -558,7 +581,7 @@ function renderMessages(phone) {
     container.appendChild(wrapper);
   });
 
-  // ⚠️ Восстанавливаем скролл
+  // Восстанавливаем скролл
   if (wasAtBottom) {
     container.scrollTop = container.scrollHeight;
   } else {
@@ -579,6 +602,7 @@ function renderMessages(phone) {
     }
   });
 }
+
 // ============================================================
 //  SEND
 // ============================================================
@@ -916,13 +940,18 @@ function renderSearchResult(phone, u, container) {
   container.appendChild(el);
 }
 
-function filterChats(value) { searchFilter = value; renderChatList(); }
+function filterChats(value) {
+  searchFilter = value;
+  document.getElementById('chatList').dataset.snapshot = '';
+  renderChatList();
+}
 
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tab);
   });
+  document.getElementById('chatList').dataset.snapshot = '';
   renderChatList();
 }
 
