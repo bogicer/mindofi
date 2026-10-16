@@ -480,12 +480,23 @@ async function loadMessages(phone) {
     newMsgs = [];
   }
 
+  // ⚠️ Сравниваем старые и новые — не рендерим если ничего не изменилось
+  const oldJson = JSON.stringify(messages[chatId] || []);
+  const newJson = JSON.stringify(newMsgs);
+
   messages[chatId] = newMsgs;
-  renderMessages(phone);
+
+  if (oldJson !== newJson) {
+    renderMessages(phone);
+  }
 }
 
 function renderMessages(phone) {
   const container = document.getElementById('messages');
+
+  // ⚠️ Сохраняем позицию скролла ПЕРЕД перерисовкой
+  const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+  const oldScrollTop = container.scrollTop;
 
   playingAudios.clear();
   container.querySelectorAll('audio').forEach(a => {
@@ -509,6 +520,7 @@ function renderMessages(phone) {
     const isOut = m.from === currentUser.phone || m.from_user === currentUser.phone;
     const wrapper = document.createElement('div');
     wrapper.className = 'message ' + (isOut ? 'out' : 'in');
+    wrapper.dataset.msgId = m.id;
 
     let content = '';
     if (m.type === 'image' && m.url) {
@@ -546,7 +558,12 @@ function renderMessages(phone) {
     container.appendChild(wrapper);
   });
 
-  container.scrollTop = container.scrollHeight;
+  // ⚠️ Восстанавливаем скролл
+  if (wasAtBottom) {
+    container.scrollTop = container.scrollHeight;
+  } else {
+    container.scrollTop = oldScrollTop;
+  }
 
   playingAudios.forEach((currentTime, id) => {
     const a = document.getElementById(id);
@@ -562,7 +579,6 @@ function renderMessages(phone) {
     }
   });
 }
-
 // ============================================================
 //  SEND
 // ============================================================
