@@ -43,7 +43,7 @@ let currentToken = null;
 let activeChat = null;
 let users = {};
 let messages = {};
-let chatIdByPhone = {};  // какой chat_id соответствует каждому телефону
+let chatIdByPhone = {};   // какой chat_id соответствует каждому телефону
 let currentTab = 'all';
 let searchFilter = '';
 let pollingTimer = null;
@@ -93,22 +93,22 @@ const ICE_CONFIG = {
     {
       urls: "turn:standard.relay.metered.ca:80",
       username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL",
+      credential: "4uqS76DRAMe51SEL"
     },
     {
       urls: "turn:standard.relay.metered.ca:80?transport=tcp",
       username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL",
+      credential: "4uqS76DRAMe51SEL"
     },
     {
       urls: "turn:standard.relay.metered.ca:443",
       username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL",
+      credential: "4uqS76DRAMe51SEL"
     },
     {
       urls: "turns:standard.relay.metered.ca:443?transport=tcp",
       username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL",
+      credential: "4uqS76DRAMe51SEL"
     }
   ],
   iceCandidatePoolSize: 10
@@ -175,7 +175,6 @@ async function init() {
   if (typeof applyTranslations === 'function') applyTranslations();
 }
 
-// Передаём телефон в Android-обёртку (WebView)
 function notifyAndroidPhone() {
   try {
     if (window.Android && typeof window.Android.savePhone === 'function' && currentUser && currentUser.phone) {
@@ -308,6 +307,9 @@ async function loadUsers() {
     // Только МОИ чаты
     if (parts[0] !== currentUser.phone && parts[1] !== currentUser.phone) continue;
 
+    // Запоминаем правильный chatId для этого телефона
+    chatIdByPhone[otherPhone] = chatId;
+
     // Профиль другого юзера
     if (!users[otherPhone]) {
       promises.push(
@@ -347,10 +349,10 @@ function renderChatList() {
   for (const phone in users) {
     const u = users[phone];
     if (!u) continue;
-    const chatId = getChatId(phone);
+    const chatId = chatIdByPhone[phone] || getChatId(phone);
     const msgs = messages[chatId] || [];
 
-    // ⚠️ Пропускаем чаты без сообщений — не показываем пустые
+    // Пропускаем чаты без сообщений
     if (msgs.length === 0) continue;
 
     const lastMsg = msgs[msgs.length - 1];
@@ -457,24 +459,29 @@ function getChatId(phone) {
   return [currentUser.phone, phone].sort().join('_');
 }
 
+function getRealChatId(phone) {
+  return chatIdByPhone[phone] || getChatId(phone);
+}
+
 async function loadMessages(phone) {
-  const chatId = getChatId(phone);
+  const chatId = getRealChatId(phone);
   const data = await apiRequest('messages/' + chatId);
 
-  let newMsgs = [];
-  if (data) {
+  const serverHasData = data && typeof data === 'object' && Object.keys(data).length > 0;
+
+  let newMsgs;
+  if (serverHasData) {
     newMsgs = Object.values(data).sort((a, b) =>
       (a.timestamp || 0) - (b.timestamp || 0)
     );
+  } else if (messages[chatId] && messages[chatId].length > 0) {
+    newMsgs = messages[chatId];
+  } else {
+    newMsgs = [];
   }
 
-  const oldJson = JSON.stringify(messages[chatId] || []);
-  const newJson = JSON.stringify(newMsgs);
   messages[chatId] = newMsgs;
-
-  if (oldJson !== newJson) {
-    renderMessages(phone);
-  }
+  renderMessages(phone);
 }
 
 function renderMessages(phone) {
@@ -489,7 +496,7 @@ function renderMessages(phone) {
 
   container.innerHTML = '';
 
-  const chatId = getChatId(phone);
+  const chatId = getRealChatId(phone);
   const msgs = messages[chatId] || [];
 
   if (!msgs.length) {
@@ -564,7 +571,7 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text || !activeChat) return;
 
-  const chatId = getChatId(activeChat);
+  const chatId = getRealChatId(activeChat);
   const msgId = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 
   const msg = {
@@ -616,7 +623,7 @@ async function onFilePick(input) {
       return;
     }
 
-    const chatId = getChatId(activeChat);
+    const chatId = getRealChatId(activeChat);
     const msgId = Date.now() + '_f';
     const msg = {
       id: msgId,
@@ -763,7 +770,7 @@ async function stopVoiceRecord(cancel) {
       return;
     }
 
-    const chatId = getChatId(activeChat);
+    const chatId = getRealChatId(activeChat);
     const msgId = Date.now() + '_v';
     const dur = Math.floor(vsec / 60) + ':' + String(vsec % 60).padStart(2, '0');
 
