@@ -91,23 +91,23 @@ const ICE_CONFIG = {
     { urls: "stun:stun.relay.metered.ca:80" },
     {
       urls: "turn:standard.relay.metered.ca:80",
-      username: "ТВОЙ_USERNAME",
-      credential: "ТВОЙ_CREDENTIAL",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL",
     },
     {
       urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-      username: "ТВОЙ_USERNAME",
-      credential: "ТВОЙ_CREDENTIAL",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL",
     },
     {
       urls: "turn:standard.relay.metered.ca:443",
-      username: "ТВОЙ_USERNAME",
-      credential: "ТВОЙ_CREDENTIAL",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL",
     },
     {
       urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-      username: "ТВОЙ_USERNAME",
-      credential: "ТВОЙ_CREDENTIAL",
+      username: "18629aff3add3ee13d19da4a",
+      credential: "4uqS76DRAMe51SEL",
     }
   ],
   iceCandidatePoolSize: 10
