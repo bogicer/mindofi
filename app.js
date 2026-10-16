@@ -297,12 +297,17 @@ async function loadUsers() {
   if (!chats) return;
 
   const promises = [];
+
   for (const chatId in chats) {
     const parts = chatId.split('_');
     if (parts.length !== 2) continue;
     const otherPhone = parts[0] === currentUser.phone ? parts[1] : parts[0];
     if (otherPhone === currentUser.phone) continue;
 
+    // Только МОИ чаты
+    if (parts[0] !== currentUser.phone && parts[1] !== currentUser.phone) continue;
+
+    // Профиль другого юзера
     if (!users[otherPhone]) {
       promises.push(
         apiRequest('users/' + otherPhone).then(u => {
@@ -310,7 +315,23 @@ async function loadUsers() {
         })
       );
     }
+
+    // Сообщения чата — чтобы в списке было превью
+    if (!messages[chatId]) {
+      promises.push(
+        apiRequest('messages/' + chatId).then(data => {
+          if (data && typeof data === 'object') {
+            messages[chatId] = Object.values(data).sort((a, b) =>
+              (a.timestamp || 0) - (b.timestamp || 0)
+            );
+          } else {
+            messages[chatId] = [];
+          }
+        })
+      );
+    }
   }
+
   await Promise.all(promises);
 }
 
