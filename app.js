@@ -43,6 +43,7 @@ let currentToken = null;
 let activeChat = null;
 let users = {};
 let messages = {};
+let chatIdByPhone = {};  // какой chat_id соответствует каждому телефону
 let currentTab = 'all';
 let searchFilter = '';
 let pollingTimer = null;
