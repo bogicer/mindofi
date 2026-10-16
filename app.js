@@ -26,6 +26,16 @@ document.addEventListener('focusin', (e) => {
 document.addEventListener('focusout', () => setTimeout(updateAppHeight, 300));
 
 // ============================================================
+//  HELPER — обход ngrok warning для картинок
+// ============================================================
+function imgUrl(url) {
+  if (!url) return url;
+  if (url.indexOf('ngrok-free') === -1) return url;
+  if (url.indexOf('ngrok-skip-browser-warning') !== -1) return url;
+  return url + (url.indexOf('?') === -1 ? '?' : '&') + 'ngrok-skip-browser-warning=true';
+}
+
+// ============================================================
 //  STATE
 // ============================================================
 let currentUser = null;
@@ -81,23 +91,23 @@ const ICE_CONFIG = {
     { urls: "stun:stun.relay.metered.ca:80" },
     {
       urls: "turn:standard.relay.metered.ca:80",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL",
     },
     {
       urls: "turn:standard.relay.metered.ca:80?transport=tcp",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL",
     },
     {
       urls: "turn:standard.relay.metered.ca:443",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL",
     },
     {
       urls: "turns:standard.relay.metered.ca:443?transport=tcp",
-      username: "18629aff3add3ee13d19da4a",
-      credential: "4uqS76DRAMe51SEL"
+      username: "ТВОЙ_USERNAME",
+      credential: "ТВОЙ_CREDENTIAL",
     }
   ],
   iceCandidatePoolSize: 10
@@ -127,6 +137,7 @@ async function init() {
   await refreshMe();
   applyTheme();
   renderMe();
+  notifyAndroidPhone();
 
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
@@ -161,6 +172,18 @@ async function init() {
   });
 
   if (typeof applyTranslations === 'function') applyTranslations();
+}
+
+// Передаём телефон в Android-обёртку (WebView)
+function notifyAndroidPhone() {
+  try {
+    if (window.Android && typeof window.Android.savePhone === 'function' && currentUser && currentUser.phone) {
+      window.Android.savePhone(currentUser.phone);
+      console.log('📱 Phone sent to Android wrapper:', currentUser.phone);
+    }
+  } catch (e) {
+    console.warn('Android bridge error:', e);
+  }
 }
 
 function bindTextarea() {
@@ -257,8 +280,8 @@ function renderMe() {
   if (typeof t === 'function') meStatus.textContent = t('status_online');
 
   if (currentUser.photoURL) {
-    meAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" alt="">';
-    if (mobileAvatar) mobileAvatar.innerHTML = '<img src="' + currentUser.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    meAvatar.innerHTML = '<img src="' + imgUrl(currentUser.photoURL) + '" alt="">';
+    if (mobileAvatar) mobileAvatar.innerHTML = '<img src="' + imgUrl(currentUser.photoURL) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
   } else {
     const letter = (currentUser.name || '?')[0].toUpperCase();
     meAvatar.textContent = letter;
@@ -304,6 +327,10 @@ function renderChatList() {
     if (!u) continue;
     const chatId = getChatId(phone);
     const msgs = messages[chatId] || [];
+
+    // ⚠️ Пропускаем чаты без сообщений — не показываем пустые
+    if (msgs.length === 0) continue;
+
     const lastMsg = msgs[msgs.length - 1];
     chatItems.push({ phone, user: u, lastMsg, chatId });
   }
@@ -340,7 +367,7 @@ function renderChatList() {
     el.onclick = () => openChat(item.phone);
 
     const avatarHTML = item.user.photoURL
-      ? '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '"><img src="' + item.user.photoURL + '" alt=""></div>'
+      ? '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '"><img src="' + imgUrl(item.user.photoURL) + '" alt=""></div>'
       : '<div class="chat-item-avatar' + (item.user.online ? ' online' : '') + '">' +
         (item.user.name || '?')[0].toUpperCase() + '</div>';
 
@@ -380,7 +407,7 @@ async function openChat(phone) {
 
   const chatAvatar = document.getElementById('chatAvatar');
   if (u.photoURL) {
-    chatAvatar.innerHTML = '<img src="' + u.photoURL + '" alt="">';
+    chatAvatar.innerHTML = '<img src="' + imgUrl(u.photoURL) + '" alt="">';
   } else {
     chatAvatar.textContent = (u.name || '?')[0].toUpperCase();
   }
@@ -456,7 +483,7 @@ function renderMessages(phone) {
 
     let content = '';
     if (m.type === 'image' && m.url) {
-      content = '<div class="message-image" onclick="openImage(\'' + m.url + '\')"><img src="' + m.url + '" loading="lazy"></div>';
+      content = '<div class="message-image" onclick="openImage(\'' + imgUrl(m.url) + '\')"><img src="' + imgUrl(m.url) + '" loading="lazy"></div>';
     } else if (m.type === 'voice' && m.url) {
       const voiceId = 'voice_' + m.id;
       let bars = '';
@@ -468,14 +495,16 @@ function renderMessages(phone) {
           '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
         '</button>' +
         '<div class="voice-wave" id="' + voiceId + '_wave">' + bars + '</div>' +
-        '<audio id="' + voiceId + '" src="' + m.url + '" preload="metadata"></audio>' +
+        '<audio id="' + voiceId + '" src="' + imgUrl(m.url) + '" preload="metadata"></audio>' +
         '<span class="voice-dur">' + (m.dur || '0:00') + '</span>' +
       '</div>';
     } else if (m.type === 'krujok' && m.url) {
-      content = '<video controls src="' + m.url + '" style="max-width:220px;border-radius:12px"></video>';
+      content = '<video controls src="' + imgUrl(m.url) + '" style="max-width:220px;border-radius:12px"></video>';
     } else if (m.type === 'file' && m.url) {
-      content = '<a href="' + m.url + '" download style="color:inherit;text-decoration:underline">📎 ' +
-        escapeHtml(m.file_name || 'File') + ' (' + (m.file_size || '?') + ')</a>';
+      const fname = m.file_name || m.fileName || 'File';
+      const fsize = m.file_size || m.fileSize || '';
+      content = '<a href="' + imgUrl(m.url) + '" download="' + escapeHtml(fname) + '" style="color:inherit;text-decoration:underline">📎 ' +
+        escapeHtml(fname) + (fsize ? ' (' + fsize + ')' : '') + '</a>';
     } else {
       content = escapeHtml(m.text || '');
     }
@@ -556,7 +585,8 @@ async function onFilePick(input) {
     const isImage = file.type.startsWith('image/');
     const res = await apiRequest('upload', 'POST', {
       image: base64,
-      type: isImage ? 'image' : 'file'
+      type: isImage ? 'image' : 'file',
+      file_name: file.name
     });
 
     if (!res || !res.url) {
@@ -829,7 +859,7 @@ function renderSearchResult(phone, u, container) {
   };
 
   const avatarHTML = u.photoURL
-    ? '<div class="chat-item-avatar"><img src="' + u.photoURL + '"></div>'
+    ? '<div class="chat-item-avatar"><img src="' + imgUrl(u.photoURL) + '"></div>'
     : '<div class="chat-item-avatar">' + (u.name || '?')[0].toUpperCase() + '</div>';
 
   el.innerHTML = avatarHTML +
@@ -859,7 +889,7 @@ function openSettingsModal() {
 
   const av = document.getElementById('settingsAvatar');
   if (currentUser.photoURL) {
-    av.innerHTML = '<img src="' + currentUser.photoURL + '"><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+    av.innerHTML = '<img src="' + imgUrl(currentUser.photoURL) + '"><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
   } else {
     av.innerHTML = '<span>' + (currentUser.name || '?')[0].toUpperCase() + '</span><div class="settings-avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
   }
@@ -1327,7 +1357,7 @@ function showCallScreen(type, role, user) {
   const callTimer = document.getElementById('callTimer');
 
   if (user && user.photoURL) {
-    callAvatar.innerHTML = '<img src="' + user.photoURL + '">';
+    callAvatar.innerHTML = '<img src="' + imgUrl(user.photoURL) + '">';
   } else {
     callAvatar.textContent = (user && user.name ? user.name : '?')[0].toUpperCase();
   }
@@ -1394,7 +1424,7 @@ function showIncoming(callData) {
   const type = document.getElementById('incomingType');
 
   if (caller && caller.photoURL) {
-    avatar.innerHTML = '<img src="' + caller.photoURL + '">';
+    avatar.innerHTML = '<img src="' + imgUrl(caller.photoURL) + '">';
   } else {
     avatar.textContent = (caller && caller.name ? caller.name : '?')[0].toUpperCase();
   }
