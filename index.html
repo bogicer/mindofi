@@ -5,79 +5,203 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MINDOFI</title>
   <link rel="icon" type="image/png" href="logo.png">
-  <link rel="stylesheet" href="index.css?v=10">
+  <link rel="stylesheet" href="index.css?v=11">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Split layout */
+    .split {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* LEFT — image side */
+    .split-left {
+      flex: 1 1 50%;
+      background: url("fon.png") center center / cover no-repeat;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .split-left::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15));
+    }
+    .split-left .brand {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      text-align: center;
+      padding: 24px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+    .split-left .brand img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+    }
+    .split-left .brand h1 {
+      margin: 0;
+      font-size: 40px;
+      letter-spacing: 4px;
+      font-weight: 800;
+    }
+    .split-left .brand p {
+      margin: 8px 0 0;
+      opacity: 0.9;
+      font-size: 15px;
+    }
+
+    /* RIGHT — form side */
+    .split-right {
+      flex: 1 1 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg, #f4f5f7);
+      position: relative;
+    }
+
+    /* Theme toggle + lang pinned to right area top */
+    .split-right .top-controls {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 5;
+    }
+
+    /* Card adjustments */
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg, #fff);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    .card .logo { display: none; }        /* hide logo in card – it's on image side */
+    .card .title { display: none; }       /* hide h1 in card */
+    .card .subtitle {
+      margin: 0 0 20px;
+      text-align: center;
+      color: var(--muted, #666);
+    }
+
+    /* Responsive: stack on mobile */
+    @media (max-width: 860px) {
+      .split { flex-direction: column; }
+      .split-left { min-height: 220px; flex: 0 0 auto; }
+      .split-left .brand h1 { font-size: 28px; letter-spacing: 2px; }
+      .split-left .brand img { width: 64px; height: 64px; margin-bottom: 8px; }
+      .split-right { flex: 1 1 auto; padding: 16px; }
+    }
+  </style>
 </head>
 <body>
 
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Theme"></button>
+  <div class="split">
 
-  <div class="lang-top">
-    <div class="lang-switch">
-      <button data-lang="en" onclick="setLang('en')">EN</button>
-      <button data-lang="uk" onclick="setLang('uk')">UK</button>
-      <button data-lang="ru" onclick="setLang('ru')">RU</button>
-      <button data-lang="pl" onclick="setLang('pl')">PL</button>
-      <button data-lang="de" onclick="setLang('de')">DE</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="logo.png" alt="MINDOFI" class="logo">
-    <h1 class="title">MINDOFI</h1>
-    <p class="subtitle" data-i18n="subtitle">Secure Messenger</p>
-
-    <div class="error" id="errBox"></div>
-    <div class="success" id="okBox"></div>
-
-    <div class="screen active" id="screenPhone">
-      <div class="phone-row">
-        <select class="country-select" id="countrySelect">
-          <option value="380">🇺🇦 +380</option>
-          <option value="7">🇷🇺 +7</option>
-          <option value="998">🇺🇿 +998</option>
-          <option value="1">🇺🇸 +1</option>
-          <option value="44">🇬🇧 +44</option>
-          <option value="49">🇩🇪 +49</option>
-          <option value="48">🇵🇱 +48</option>
-        </select>
-        <input class="phone-input" id="phoneInput" type="tel" maxlength="15"
-               placeholder="50 123 45 67" data-i18n-ph="phone_placeholder">
-      </div>
-      <button class="btn" id="phoneBtn" onclick="sendOtp()" data-i18n="btn_continue">Continue</button>
-      <div class="link">
-        <a id="modeLink" onclick="toggleMode()" data-i18n="link_register">No account? Sign up</a>
+    <!-- LEFT: фоновая картинка -->
+    <div class="split-left">
+      <div class="brand">
+        <img src="logo.png" alt="MINDOFI">
+        <h1>MINDOFI</h1>
+        <p data-i18n="subtitle">Secure Messenger</p>
       </div>
     </div>
 
-    <div class="screen" id="screenOtp">
-      <p class="hint" id="otpHint">Code sent to +380...</p>
-      <div class="otp-row">
-        <input class="otp-input" id="o1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
-        <input class="otp-input" id="o2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
-        <input class="otp-input" id="o3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)">
-        <input class="otp-input" id="o4" maxlength="1" inputmode="numeric" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
-        <input class="otp-input" id="o5" maxlength="1" inputmode="numeric" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
-      </div>
-      <button class="btn" onclick="verifyOtp()" data-i18n="btn_confirm">Confirm</button>
-      <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
-    </div>
+    <!-- RIGHT: логин / регистрация -->
+    <div class="split-right">
 
-    <div class="screen" id="screenName">
-      <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
-        <div class="plus">+</div>
-        <div class="avatar-label" data-i18n="avatar_label">Photo</div>
-        <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="onAvatarPick(this)">
+      <div class="top-controls">
+        <div class="lang-switch">
+          <button data-lang="en" onclick="setLang('en')">EN</button>
+          <button data-lang="uk" onclick="setLang('uk')">UK</button>
+          <button data-lang="ru" onclick="setLang('ru')">RU</button>
+          <button data-lang="pl" onclick="setLang('pl')">PL</button>
+          <button data-lang="de" onclick="setLang('de')">DE</button>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Theme"></button>
       </div>
-      <div class="field">
-        <input class="text-input" id="nameInput" maxlength="40"
-               placeholder="Your name" data-i18n-ph="name_placeholder">
+
+      <div class="card">
+        <img src="logo.png" alt="MINDOFI" class="logo">
+        <h1 class="title">MINDOFI</h1>
+        <p class="subtitle" data-i18n="subtitle">Secure Messenger</p>
+
+        <div class="error" id="errBox"></div>
+        <div class="success" id="okBox"></div>
+
+        <div class="screen active" id="screenPhone">
+          <div class="phone-row">
+            <select class="country-select" id="countrySelect">
+              <option value="380">🇺🇦 +380</option>
+              <option value="7">🇷🇺 +7</option>
+              <option value="998">🇺🇿 +998</option>
+              <option value="1">🇺🇸 +1</option>
+              <option value="44">🇬🇧 +44</option>
+              <option value="49">🇩🇪 +49</option>
+              <option value="48">🇵🇱 +48</option>
+            </select>
+            <input class="phone-input" id="phoneInput" type="tel" maxlength="15"
+                   placeholder="50 123 45 67" data-i18n-ph="phone_placeholder">
+          </div>
+          <button class="btn" id="phoneBtn" onclick="sendOtp()" data-i18n="btn_continue">Continue</button>
+          <div class="link">
+            <a id="modeLink" onclick="toggleMode()" data-i18n="link_register">No account? Sign up</a>
+          </div>
+        </div>
+
+        <div class="screen" id="screenOtp">
+          <p class="hint" id="otpHint">Code sent to +380...</p>
+          <div class="otp-row">
+            <input class="otp-input" id="o1" maxlength="1" inputmode="numeric" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
+            <input class="otp-input" id="o2" maxlength="1" inputmode="numeric" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
+            <input class="otp-input" id="o3" maxlength="1" inputmode="numeric" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)">
+            <input class="otp-input" id="o4" maxlength="1" inputmode="numeric" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
+            <input class="otp-input" id="o5" maxlength="1" inputmode="numeric" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
+          </div>
+          <button class="btn" onclick="verifyOtp()" data-i18n="btn_confirm">Confirm</button>
+          <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
+        </div>
+
+        <div class="screen" id="screenName">
+          <div class="avatar-upload" id="avatarBox" onclick="document.getElementById('avatarInput').click()">
+            <div class="plus">+</div>
+            <div class="avatar-label" data-i18n="avatar_label">Photo</div>
+            <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="onAvatarPick(this)">
+          </div>
+          <div class="field">
+            <input class="text-input" id="nameInput" maxlength="40"
+                   placeholder="Your name" data-i18n-ph="name_placeholder">
+          </div>
+          <div class="field">
+            <input class="text-input" id="usernameInput" maxlength="30"
+                   placeholder="@username (optional)" data-i18n-ph="username_placeholder">
+          </div>
+          <button class="btn" onclick="doRegister()" data-i18n="btn_create_account">Create account</button>
+          <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
+        </div>
+
       </div>
-      <div class="field">
-        <input class="text-input" id="usernameInput" maxlength="30"
-               placeholder="@username (optional)" data-i18n-ph="username_placeholder">
-      </div>
-      <button class="btn" onclick="doRegister()" data-i18n="btn_create_account">Create account</button>
-      <div class="link"><a onclick="goBack('phone')" data-i18n="link_back">← Back</a></div>
     </div>
 
   </div>
